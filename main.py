@@ -1,6 +1,7 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import json
 
 import asyncio
 from pyrogram import Client, filters
@@ -9,6 +10,11 @@ from pyrogram.types import BotCommand
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
+
+GROUP_ID = os.environ.get("GROUP_ID")
+
+user_messages = {}
+
 
 app = Client("chats_todo_bot")
 
@@ -45,7 +51,10 @@ async def handle_do_all_actions(client, message):
 
 @app.on_message(filters.command("summary"))
 async def handle_do_summary(client, message):
-    await message.reply_text(f"summary")
+    try:
+        await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+    except:
+        await message.reply_text("no summary available")
 
 
 @app.on_message(filters.command("todo"))
@@ -63,9 +72,14 @@ async def handle_do_event(client, message):
     await message.reply_text(f"feedback")
 
 
+# testing if the bot can read messages
+# @app.on_message(filters.group & filters.text)
+# async def echo(client, message):
+#     await message.reply_text(f"You said {message.text}")
+
+
 async def set_commands():
     await app.set_bot_commands([
-        BotCommand("start", "Start interacting with the bot"),
         BotCommand("help", "Get help and instructions on how to use the bot"),
         BotCommand("all", "Get summary, todo and event"),
         BotCommand("viewgroups", "View groups that I am connected to"),
@@ -76,6 +90,25 @@ async def set_commands():
         BotCommand("event", "Get event of group(s)"),
         BotCommand("feedback", "Let us know how we can better serve you")
     ])
+
+
+@app.on_message(filters.group)
+async def handle_message(client, message):
+    user_name = message.from_user.username
+    chat_id = message.chat.id
+    text = message.text or message.caption or ''
+
+    if f"{chat_id}" in user_messages:
+        user_messages[f"{chat_id}"].append(text)
+    else:
+        user_messages[f"{chat_id}"] = [text]
+
+    # Optionally, save to file for persistence
+    with open("messages.json", "w") as file:
+        json.dump(user_messages, file, indent=4)
+
+    print(
+        f"User {message.from_user.username or message.from_user.id} said: {text}")
 
 
 async def main():
