@@ -8,17 +8,20 @@ from pyrogram import Client, filters
 from bot.commands import summary, todo, event, feedback, schedule, group
 from bot.commands.commands import COMMANDS, set_commands
 
+from api.openai_manager import OpenAiHelper
+
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 GROUP_ID = os.environ.get("GROUP_ID")
+OPENAI_KEY = os.environ.get("OPENAI_KEY")
 
 user_messages = {}
 
 
 app = Client("chats_todo_bot")
-
+openai_helper = OpenAiHelper(OPENAI_KEY)
 
 with open("content/submessages.json", "r") as file:
     SUB_MESSAGES = json.load(file)
@@ -85,9 +88,10 @@ app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 
 
 # testing if the bot can read messages
-# @app.on_message(filters.group & filters.text)
-# async def echo(client, message):
-#     await message.reply_text(f"You said {message.text}")
+@app.on_message(filters.group & filters.text)
+async def echo(client, message):
+    response = openai_helper.get_response(message.text)
+    await message.reply_text(response)
 
 
 @app.on_message(filters.group)
