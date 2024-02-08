@@ -27,6 +27,12 @@ with open("content/submessages.json", "r") as file:
     SUB_MESSAGES = json.load(file)
 
 
+async def get_user_groups(user_id):
+    # Placeholder for your database query
+    # Return a list of tuples (group_id, group_name) for the given user_id
+    return [(1, "Group A"), (2, "Group B")]  # Example data
+
+
 @app.on_message(filters.command("start"))
 async def handle_start(client, message):
     command = message.command[0]
@@ -88,23 +94,32 @@ async def handle_do_summary(client, message):
     null_message = COMMANDS[command]["null"]
     current_chat_id = f"{message.chat.id}"
 
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("All", callback_data="summary_all")],
-        [InlineKeyboardButton("Group A", callback_data="summary_group_a")]
-    ])
+    user_id = message.from_user.id
+    user_groups = await get_user_groups(user_id)
+
+    # Generate dynamic inline keyboard based on user groups
+    keyboard = InlineKeyboardMarkup(
+        [[InlineKeyboardButton(group_name, callback_data=f"summary_{group_id}")] for group_id, group_name in user_groups] +
+        # Optional 'All' button
+        [[InlineKeyboardButton("All", callback_data="summary_all")]]
+    )
+
     await message.reply_text("Which groups' summary do you want to view?", reply_markup=keyboard)
 
+
 # Callback query handler for the summary options
-
-
 @app.on_callback_query(filters.regex(r"^summary_"))
 async def summary_selection(client: Client, callback_query):
     data = callback_query.data
     if data == "summary_all":
-        await callback_query.message.edit_text("Here is the summary for all!")
-    elif data == "summary_group_a":
-        await callback_query.message.edit_text("Here is the summary for Group A")
-
+        # Handle 'All' selection
+        await callback_query.message.edit_text("Here is the summary for all groups!")
+    else:
+        # Handle specific group selection
+        group_id = data.split("_")[1]
+        # Retrieve and send the summary for the selected group
+        # This part depends on how you store and retrieve summaries for groups
+        await callback_query.message.edit_text(f"Here is the summary for Group ID {group_id}")
     # try:
     #     if current_chat_id in user_messages:
     #         await message.reply_text(reply)
