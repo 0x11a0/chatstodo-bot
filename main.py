@@ -5,7 +5,7 @@ import json
 
 import asyncio
 from pyrogram import Client, filters
-from bot.commands import summary, todo, event
+from bot.commands import summary, todo, event, feedback, schedule, group
 from bot.commands.commands import COMMANDS, set_commands
 
 
@@ -24,12 +24,6 @@ with open("content/submessages.json", "r") as file:
     SUB_MESSAGES = json.load(file)
 
 
-async def get_user_groups(user_id):
-    # Placeholder for your database query
-    # Return a list of tuples (group_id, group_name) for the given user_id
-    return [(1, "Group A"), (2, "Group B")]  # Example data
-
-
 @app.on_message(filters.command("start"))
 async def handle_start(client, message):
     command = message.command[0]
@@ -44,25 +38,7 @@ async def handle_help(client, message):
     await message.reply_text(reply)
 
 
-@app.on_message(filters.command("viewgroups"))
-async def handle_view_groups(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
-
-
-@app.on_message(filters.command("addgroup"))
-async def handle_add_group(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
-
-
-@app.on_message(filters.command("deletegroup"))
-async def handle_delete_group(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+app.on_message(filters.command("groups"))(group.handle_manage_groups)
 
 
 @app.on_message(filters.command("all"))
@@ -98,18 +74,10 @@ app.on_message(filters.command("event"))(event.handle_event)
 app.on_callback_query(filters.regex(r"^event_"))(event.handle_event_selection)
 
 
-@app.on_message(filters.command("feedback"))
-async def handle_do_feedback(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+app.on_message(filters.command("feedback"))(feedback.handle_feedback)
 
 
-@app.on_message(filters.command("schedule"))
-async def handle_do_schedule(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 
 
 # testing if the bot can read messages
@@ -139,7 +107,6 @@ async def handle_message(client, message):
 async def main():
 
     async with app:
-
         await set_commands(app)  # Set bot commands
         print("Bot is running...")
         await asyncio.get_event_loop().create_future()
