@@ -1,54 +1,60 @@
 {
   "start": {
     "message": "I am ChatsTodo, your personal virtual assistant!",
-    "description": ""
+    "description": "Start me up!"
   },
   "help": {
-    "message": "Here are FAQ",
-    "description": ""
+    "message": "Here's how you can use this bot",
+    "description": "Get help and instructions on how to use the bot"
   },
   "viewgroups": {
     "message": "view groups",
-    "description": "",
+    "description": "View groups that I am connected to",
     "error": "cannot view"
   },
   "addgroup": {
     "message": "add groups",
-    "description": "",
+    "description": "Add groups to track",
     "error": "cannot add"
   },
   "deletegroup": {
     "message": "delete groups",
-    "description": "",
+    "description": "Delete groups from my tracking",
     "error": "cannot delete"
   },
   "all": {
     "message": "add all",
-    "description": "",
+    "description": "Get summary, todo and event",
     "null": "no all",
     "error": "cannot all"
   },
   "summary": {
     "message": "summary",
-    "description": "",
+    "description": "Which groups' summary do you want to view?",
     "null": "no chats summary",
     "error": "cannot summary"
   },
   "todo": {
     "message": "todo",
-    "description": "",
+    "description": "Get todo of group(s)",
     "null": "no chats todo",
     "error": "cannot todo"
   },
   "event": {
     "message": "event",
-    "description": "",
+    "description": "Get event of group(s)",
     "null": "no chats event",
     "error": "cannot event"
   },
+  "schedule": {
+    "message": "schedule",
+    "description": "schedule at intervals",
+    "null": "no schedule",
+    "error": "cannot schedule"
+  },
   "feedback": {
     "message": "feedback",
-    "description": "",
+    "description": "Let us know how we can better serve you",
     "error": "cannot feedback"
   }
 }
