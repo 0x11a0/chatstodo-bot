@@ -88,7 +88,7 @@ app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 
 
 # testing if the bot can read messages
-@app.on_message(filters.group & filters.text)
+@app.on_message(filters.group & filters.command("test") & filters.text)
 async def echo(client, message):
     response = openai_helper.get_response(message.text)
     await message.reply_text(response)
