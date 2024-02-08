@@ -19,57 +19,83 @@ user_messages = {}
 app = Client("chats_todo_bot")
 
 
+with open("content/messages.json", "r") as file:
+    CONTENT = json.load(file)
+
+
 @app.on_message(filters.command("start"))
 async def handle_start(client, message):
-    await message.reply_text(f"Hello, {message.from_user.first_name}! How can I help you today?")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(f"Hello, {message.from_user.first_name}!\n\n" + reply)
 
 
 @app.on_message(filters.command("help"))
 async def handle_help(client, message):
-    await message.reply_text(f"help")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("viewgroups"))
 async def handle_view_groups(client, message):
-    await message.reply_text(f"view groups connected to")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("addgroup"))
 async def handle_add_group(client, message):
-    await message.reply_text(f"add a group to track")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("deletegroup"))
 async def handle_delete_group(client, message):
-    await message.reply_text(f"delete a group from tracking")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("all"))
 async def handle_do_all_actions(client, message):
-    await message.reply_text(f"summary, todo, events")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("summary"))
 async def handle_do_summary(client, message):
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    error_message = CONTENT[command]["error"]
     try:
+        await message.reply_text(reply)
         await message.reply_text(str(user_messages[f"{message.chat.id}"]))
     except:
-        await message.reply_text("no summary available")
+        await message.reply_text(error_message)
 
 
 @app.on_message(filters.command("todo"))
 async def handle_do_todo(client, message):
-    await message.reply_text(f"to dos")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("event"))
 async def handle_do_event(client, message):
-    await message.reply_text(f"events")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 @app.on_message(filters.command("feedback"))
 async def handle_do_event(client, message):
-    await message.reply_text(f"feedback")
+    command = message.command[0]
+    reply = CONTENT[command]["message"]
+    await message.reply_text(reply)
 
 
 # testing if the bot can read messages
@@ -112,7 +138,9 @@ async def handle_message(client, message):
 
 
 async def main():
+
     async with app:
+
         await set_commands()  # Set bot commands
         print("Bot is running...")
         await asyncio.get_event_loop().create_future()

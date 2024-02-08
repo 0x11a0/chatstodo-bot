@@ -1,0 +1,20 @@
+{
+  "start": {
+    "message": "I am ChatsTodo, your personal virtual assistant!",
+    "description": ""
+  },
+  "help": {
+    "message": "Here are FAQ",
+    "description": ""
+  },
+  "viewgroups": {
+    "message": "view groups",
+    "description": "",
+    "error": "cannot view"
+  },
+  "addgroup": {
+    "message": "add groups",
+    "description": "",
+    "error": "cannot add"
+  }
+}
