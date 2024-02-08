@@ -16,6 +16,7 @@ load_dotenv(dotenv_path)
 
 GROUP_ID = os.environ.get("GROUP_ID")
 OPENAI_KEY = os.environ.get("OPENAI_KEY")
+IS_OPENAI_TURN_ON = os.environ.get("TURN_ON") == 'True'
 
 user_messages = {}
 
@@ -90,8 +91,12 @@ app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 # testing if the bot can read messages
 @app.on_message(filters.group & filters.command("test") & filters.text)
 async def echo(client, message):
-    response = openai_helper.get_response(message.text)
-    await message.reply_text(response)
+    print(bool(IS_OPENAI_TURN_ON))
+    if bool(IS_OPENAI_TURN_ON):
+        response = openai_helper.get_response(message.text)
+        await message.reply_text(response)
+    else:
+        await message.reply_text(f"you said {message.text}")
 
 
 @app.on_message(filters.group)
