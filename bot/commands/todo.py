@@ -3,7 +3,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from bot.commands.commands import COMMANDS
 
 
-async def handle_summary(client, message):
+async def handle_todo(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     error_message = COMMANDS[command]["error"]
@@ -15,25 +15,25 @@ async def handle_summary(client, message):
 
     # Generate dynamic inline keyboard based on user groups
     keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(group_name, callback_data=f"summary_{group_id}")] for group_id, group_name in user_groups] +
+        [[InlineKeyboardButton(group_name, callback_data=f"todo_{group_id}")] for group_id, group_name in user_groups] +
         # Optional 'All' button
-        [[InlineKeyboardButton("All", callback_data="summary_all")]]
+        [[InlineKeyboardButton("All", callback_data="todo_all")]]
     )
 
-    await message.reply_text("Which groups' summary do you want to view?", reply_markup=keyboard)
+    await message.reply_text("Which groups' todo do you want to view?", reply_markup=keyboard)
 
 
-async def handle_summary_selection(client, callback_query):
+async def handle_todo_selection(client, callback_query):
     data = callback_query.data
-    if data == "summary_all":
+    if data == "todo_all":
         # Handle 'All' selection
-        await callback_query.message.edit_text("Here is the summary for all groups!")
+        await callback_query.message.edit_text("Here are your todos for all groups!")
     else:
         # Handle specific group selection
         group_id = data.split("_")[1]
         # Retrieve and send the summary for the selected group
         # This part depends on how you store and retrieve summaries for groups
-        await callback_query.message.edit_text(f"Here is the summary for Group ID {group_id}")
+        await callback_query.message.edit_text(f"Here are your todos for Group ID {group_id}")
     # try:
     #     if current_chat_id in user_messages:
     #         await message.reply_text(reply)
