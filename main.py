@@ -5,8 +5,7 @@ import json
 
 import asyncio
 from pyrogram import Client, filters
-from pyrogram.types import BotCommand, InlineKeyboardMarkup, InlineKeyboardButton
-from bot.commands import summary, todo
+from bot.commands import summary, todo, event
 from bot.commands.commands import COMMANDS, set_commands
 
 
@@ -95,26 +94,12 @@ app.on_message(filters.command("todo"))(todo.handle_todo)
 app.on_callback_query(filters.regex(r"^todo_"))(todo.handle_todo_selection)
 
 
-@app.on_message(filters.command("event"))
-async def handle_do_event(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    error_message = COMMANDS[command]["error"]
-    null_message = COMMANDS[command]["null"]
-    current_chat_id = f"{message.chat.id}"
-
-    try:
-        if current_chat_id in user_messages:
-            await message.reply_text(reply)
-            await message.reply_text(str(user_messages[f"{message.chat.id}"]))
-        else:
-            await message.reply_text(null_message)
-    except:
-        await message.reply_text(error_message)
+app.on_message(filters.command("event"))(event.handle_event)
+app.on_callback_query(filters.regex(r"^event_"))(event.handle_event_selection)
 
 
 @app.on_message(filters.command("feedback"))
-async def handle_do_event(client, message):
+async def handle_do_feedback(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     await message.reply_text(reply)
