@@ -8,28 +8,27 @@ async def handle_manage_groups(client, message):
     reply = COMMANDS[command]["message"]
     user_id = message.from_user.id
 
-    await message.reply_text(reply)
-
-
-async def handle_view_group(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    user_id = message.from_user.id
-    user_groups = await get_user_groups(user_id)
+    # Define the inline keyboard layout
     keyboard = InlineKeyboardMarkup(
-        [[InlineKeyboardButton(group_name, callback_data=f"summary_{
-                               group_id}")] for group_id, group_name in user_groups]
+        [
+            [InlineKeyboardButton("Add Group", callback_data="groups_add")],
+            [InlineKeyboardButton("View Groups", callback_data="groups_view")],
+            [InlineKeyboardButton(
+                "Delete Group", callback_data="groups_delete")]
+        ]
     )
+
+    # Send the message with the inline keyboard attached
     await message.reply_text(reply, reply_markup=keyboard)
 
 
-async def handle_add_group(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+async def handle_view_group(client, callback_query):
+    await callback_query.message.edit_text("Functionality to add a group will be implemented here.")
 
 
-async def handle_delete_group(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+async def handle_add_group(client, callback_query):
+    await callback_query.message.edit_text("Functionality to view groups will be implemented here.")
+
+
+async def handle_delete_group(client, callback_query):
+    await callback_query.message.edit_text("Functionality to delete a group will be implemented here.")
