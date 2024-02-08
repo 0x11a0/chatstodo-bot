@@ -7,20 +7,10 @@
     "message": "Here's how you can use this bot",
     "description": "Get help and instructions on how to use the bot"
   },
-  "viewgroups": {
-    "message": "view groups",
-    "description": "View groups that I am connected to",
-    "error": "cannot view"
-  },
-  "addgroup": {
-    "message": "add groups",
-    "description": "Add groups to track",
-    "error": "cannot add"
-  },
-  "deletegroup": {
-    "message": "delete groups",
-    "description": "Delete groups from my tracking",
-    "error": "cannot delete"
+  "groups": {
+    "message": "manage groups",
+    "description": "manage groups that I am connected to",
+    "error": "cannot manage groups"
   },
   "all": {
     "message": "add all",
