@@ -16,5 +16,39 @@
     "message": "add groups",
     "description": "",
     "error": "cannot add"
+  },
+  "deletegroup": {
+    "message": "delete groups",
+    "description": "",
+    "error": "cannot delete"
+  },
+  "all": {
+    "message": "add all",
+    "description": "",
+    "null": "no all",
+    "error": "cannot all"
+  },
+  "summary": {
+    "message": "summary",
+    "description": "",
+    "null": "no chats summary",
+    "error": "cannot summary"
+  },
+  "todo": {
+    "message": "todo",
+    "description": "",
+    "null": "no chats todo",
+    "error": "cannot todo"
+  },
+  "event": {
+    "message": "event",
+    "description": "",
+    "null": "no chats event",
+    "error": "cannot event"
+  },
+  "feedback": {
+    "message": "feedback",
+    "description": "",
+    "error": "cannot feedback"
   }
 }
