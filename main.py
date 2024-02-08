@@ -62,7 +62,18 @@ async def handle_delete_group(client, message):
 async def handle_do_all_actions(client, message):
     command = message.command[0]
     reply = CONTENT[command]["message"]
-    await message.reply_text(reply)
+    error_message = CONTENT[command]["error"]
+    null_message = CONTENT[command]["null"]
+    current_chat_id = f"{message.chat.id}"
+
+    try:
+        if current_chat_id in user_messages:
+            await message.reply_text(reply)
+            await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+        else:
+            await message.reply_text(null_message)
+    except:
+        await message.reply_text(error_message)
 
 
 @app.on_message(filters.command("summary"))
@@ -70,9 +81,15 @@ async def handle_do_summary(client, message):
     command = message.command[0]
     reply = CONTENT[command]["message"]
     error_message = CONTENT[command]["error"]
+    null_message = CONTENT[command]["null"]
+    current_chat_id = f"{message.chat.id}"
+
     try:
-        await message.reply_text(reply)
-        await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+        if current_chat_id in user_messages:
+            await message.reply_text(reply)
+            await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+        else:
+            await message.reply_text(null_message)
     except:
         await message.reply_text(error_message)
 
@@ -81,14 +98,36 @@ async def handle_do_summary(client, message):
 async def handle_do_todo(client, message):
     command = message.command[0]
     reply = CONTENT[command]["message"]
-    await message.reply_text(reply)
+    error_message = CONTENT[command]["error"]
+    null_message = CONTENT[command]["null"]
+    current_chat_id = f"{message.chat.id}"
+
+    try:
+        if current_chat_id in user_messages:
+            await message.reply_text(reply)
+            await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+        else:
+            await message.reply_text(null_message)
+    except:
+        await message.reply_text(error_message)
 
 
 @app.on_message(filters.command("event"))
 async def handle_do_event(client, message):
     command = message.command[0]
     reply = CONTENT[command]["message"]
-    await message.reply_text(reply)
+    error_message = CONTENT[command]["error"]
+    null_message = CONTENT[command]["null"]
+    current_chat_id = f"{message.chat.id}"
+
+    try:
+        if current_chat_id in user_messages:
+            await message.reply_text(reply)
+            await message.reply_text(str(user_messages[f"{message.chat.id}"]))
+        else:
+            await message.reply_text(null_message)
+    except:
+        await message.reply_text(error_message)
 
 
 @app.on_message(filters.command("feedback"))
