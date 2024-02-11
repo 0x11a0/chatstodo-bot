@@ -43,8 +43,13 @@ async def handle_help(client, message):
     await message.reply_text(reply)
 
 
-app.on_message(filters.group & filters.text)(
+app.on_message(filters.group & filters.text, group=1)(
     chat_handler.track_user_interaction)
+app.on_message(filters.command("start"))(handle_start)
+
+app.on_message(filters.command("task") & filters.private)(task.handle_task)
+app.on_message(filters.command("task") & filters.group)(
+    task.handle_task_for_a_group)
 
 app.on_message(filters.command("summary") &
                filters.private)(summary.handle_summary)
@@ -52,15 +57,9 @@ app.on_message(filters.command("summary") &
                filters.group)(summary.handle_summary_for_a_group)
 
 
-app.on_message(filters.command("start"))(handle_start)
-
-
-app.on_message(filters.command("task") & filters.private)(task.handle_task)
-app.on_message(filters.command("task") & filters.group)(task.handle_task)
-
-
 app.on_message(filters.command("event") & filters.private)(event.handle_event)
-app.on_message(filters.command("event") & filters.group)(event.handle_event)
+app.on_message(filters.command("event") & filters.group)(
+    event.handle_event_for_a_group)
 
 
 app.on_message(filters.command("groups"))(group.handle_manage_groups)

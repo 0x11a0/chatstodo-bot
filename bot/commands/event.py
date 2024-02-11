@@ -1,42 +1,37 @@
 from bot.commands.commands import COMMANDS
-from bot.chat_handler import read_user_interactions, user_belongs_to_chat
+from bot.chat_handler import process_chat_history
 
 
 async def handle_event(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
-    error_message = COMMANDS[command]["error"]
-    null_message = COMMANDS[command]["null"]
-    current_chat_id = f"{message.chat.id}"
-
     user_id = message.from_user.id
 
-    chats = read_user_interactions()
+    event_content = await process_chat_history(client, user_id)
 
-    preprocessed_chat = {}
+    processed_chat = ""
 
-    for chat, content in chats.items():
-        if await user_belongs_to_chat(client, user_id, chat):
-            print(chat, content)
-            preprocessed_chat[chat] = content
+    for chat, content in event_content.items():
+        processed_chat += f"<b>{chat}</b>\n"
+        for line in content:
+            processed_chat += f"{line}\n"
 
-    await message.reply_text("Here is the event you requested for!" + str(preprocessed_chat))
+    response_message = "Here is the event you requested for!\n\n" + \
+        processed_chat
+    await message.reply_text(response_message)
 
 
 async def handle_event_for_a_group(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
-    error_message = COMMANDS[command]["error"]
-    null_message = COMMANDS[command]["null"]
-    current_chat_id = f"{message.chat.id}"
-
+    current_chat_id = message.chat.id
     user_id = message.from_user.id
 
-    chats = read_user_interactions()
+    event_content = await process_chat_history(client, user_id, current_chat_id)
 
-    preprocessed_chat = []
+    processed_chat = ""
+    for content in event_content.get(current_chat_id, {}):
+        processed_chat += f"{content}\n"
 
-    if await user_belongs_to_chat(client, user_id, current_chat_id):
-        preprocessed_chat = chats[current_chat_id]
-
-    await message.reply_text("Here is the event you requested for!" + str(preprocessed_chat))
+    response_message = "Here is the event you requested for!\n\n" + processed_chat
+    await message.reply_text(response_message)
