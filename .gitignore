@@ -1,6 +1,10 @@
 *.session
 *.session-journal
 *.json
+model/
+t5_event.py
+t5_summary.py
+t5_task.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
