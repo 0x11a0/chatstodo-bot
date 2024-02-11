@@ -1,3 +1,4 @@
+from bot.commands.commands import COMMANDS
 import json
 from pyrogram.errors import PeerIdInvalid, UserNotParticipant
 
@@ -12,6 +13,11 @@ def read_user_interactions():
 
 
 async def track_user_interaction(client, message):
+    # Check if the message is a command
+    if message.text and message.text.startswith('/'):
+        print("Command detected, skipping...")
+        return  # Skip adding command messages to interactions
+
     print("listening")
     chat_id = str(message.chat.id)  # Convert to string for JSON keys
     user_chat_interactions = read_user_interactions()
@@ -21,7 +27,7 @@ async def track_user_interaction(client, message):
         user_chat_interactions[chat_id] = []
 
     # Append the new message to the list of messages for this chat
-    user_chat_interactions[chat_id].append(message.text or "Non-text message")
+    user_chat_interactions[chat_id].append(message.text or "nil")
 
     # Save back to the file
     with open("user_chat_interactions.json", "w") as file:
@@ -37,3 +43,20 @@ async def user_belongs_to_chat(client, user_id, chat_id):
     except PeerIdInvalid:
         print("The chat ID or user ID is invalid.")
         return False  # The provided chat ID or user ID is invalid
+
+
+async def process_chat_history(client, user_id, chat_id=None):
+    chats = read_user_interactions()
+    summary_content = {}
+
+    # If chat_id is provided, filter for that specific group
+    if chat_id:
+        if str(chat_id) in chats and await user_belongs_to_chat(client, user_id, chat_id):
+            summary_content[chat_id] = chats[str(chat_id)]
+    else:
+        # Process summary for all groups the user belongs to
+        for chat, content in chats.items():
+            if await user_belongs_to_chat(client, user_id, chat):
+                summary_content[chat] = content
+
+    return summary_content
