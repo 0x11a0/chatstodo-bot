@@ -2,7 +2,7 @@ from bot.commands.commands import COMMANDS
 from bot.chat_handler import read_user_interactions, user_belongs_to_chat
 
 
-async def handle_event(client, message):
+async def handle_task(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     error_message = COMMANDS[command]["error"]
@@ -20,10 +20,10 @@ async def handle_event(client, message):
             print(chat, content)
             preprocessed_chat[chat] = content
 
-    await message.reply_text("Here is the event you requested for!" + str(preprocessed_chat))
+    await message.reply_text("Here is the task you requested for!" + str(preprocessed_chat))
 
 
-async def handle_event_for_a_group(client, message):
+async def handle_task_for_a_group(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     error_message = COMMANDS[command]["error"]
@@ -39,4 +39,4 @@ async def handle_event_for_a_group(client, message):
     if await user_belongs_to_chat(client, user_id, current_chat_id):
         preprocessed_chat = chats[current_chat_id]
 
-    await message.reply_text("Here is the event you requested for!" + str(preprocessed_chat))
+    await message.reply_text("Here is the task you requested for!" + str(preprocessed_chat))
