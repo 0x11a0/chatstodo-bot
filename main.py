@@ -43,10 +43,14 @@ async def handle_help(client, message):
 
 
 app.on_message(filters.command("groups"))(group.handle_manage_groups)
-app.on_callback_query(filters.regex("^groups_add$"))(group.handle_add_group)
-app.on_callback_query(filters.regex("^groups_view$"))(group.handle_view_group)
-app.on_callback_query(filters.regex("^groups_delete$")
-                      )(group.handle_delete_group)
+app.on_message(filters.text & filters.regex(
+    "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_group_navigation)
+app.on_message(filters.text & ~filters.regex(
+    "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
+# app.on_callback_query(filters.regex("^groups_add$"))(group.handle_add_group)
+# app.on_callback_query(filters.regex("^groups_view$"))(group.handle_view_group)
+# app.on_callback_query(filters.regex("^groups_delete$")
+#                       )(group.handle_delete_group)
 
 
 @app.on_message(filters.command("all"))
