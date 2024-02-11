@@ -12,6 +12,7 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
 OPENAI_KEY = os.environ.get("OPENAI_KEY")
+TURN_ON = os.environ.get("TURN_ON") == 'True'
 
 
 async def handle_task(client, message):
@@ -28,8 +29,11 @@ async def handle_task(client, message):
 
         chat_log = " ".join(content)
 
-        openai_helper = OpenAiHelper(OPENAI_KEY)
-        response = openai_helper.get_task_response(chat_log)
+        if TURN_ON:
+            openai_helper = OpenAiHelper(OPENAI_KEY)
+            response = openai_helper.get_task_response(chat_log)
+        else:
+            response = "mocked tasks"
 
         processed_chat += f"<b>{chat}</b>\n\n" + response
 
@@ -47,8 +51,11 @@ async def handle_task_for_a_group(client, message):
     task_content = await process_chat_history(client, user_id, current_chat_id)
     chat_log = " ".join(task_content.get(current_chat_id, {}))
 
-    openai_helper = OpenAiHelper(OPENAI_KEY)
-    response = openai_helper.get_task_response(chat_log)
+    if TURN_ON:
+        openai_helper = OpenAiHelper(OPENAI_KEY)
+        response = openai_helper.get_task_response(chat_log)
+    else:
+        response = "mocked tasks"
 
     response_message = "Here is the task you requested for!\n\n" + response
     await message.reply_text(response_message)

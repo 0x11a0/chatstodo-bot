@@ -1,5 +1,17 @@
 from bot.commands.commands import COMMANDS
 from bot.chat_handler import process_chat_history
+from api.openai_manager import OpenAiHelper
+
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+OPENAI_KEY = os.environ.get("OPENAI_KEY")
+TURN_ON = os.environ.get("TURN_ON") == 'True'
 
 
 async def handle_event(client, message):
@@ -12,9 +24,17 @@ async def handle_event(client, message):
     processed_chat = ""
 
     for chat, content in event_content.items():
-        processed_chat += f"<b>{chat}</b>\n"
-        for line in content:
-            processed_chat += f"{line}\n"
+        processed_chat += f"<b>{chat}</b>\n\n"
+
+        chat_log = " ".join(content)
+
+        if TURN_ON:
+            openai_helper = OpenAiHelper(OPENAI_KEY)
+            response = openai_helper.get_event_response(chat_log)
+        else:
+            response = "mocked events"
+
+        processed_chat += f"<b>{chat}</b>\n\n" + response
 
     response_message = "Here is the event you requested for!\n\n" + \
         processed_chat
@@ -28,10 +48,13 @@ async def handle_event_for_a_group(client, message):
     user_id = message.from_user.id
 
     event_content = await process_chat_history(client, user_id, current_chat_id)
+    chat_log = " ".join(event_content.get(current_chat_id, {}))
 
-    processed_chat = ""
-    for content in event_content.get(current_chat_id, {}):
-        processed_chat += f"{content}\n"
+    if TURN_ON:
+        openai_helper = OpenAiHelper(OPENAI_KEY)
+        response = openai_helper.get_event_response(chat_log)
+    else:
+        response = "mocked events"
 
-    response_message = "Here is the event you requested for!\n\n" + processed_chat
+    response_message = "Here is the event you requested for!\n\n" + response
     await message.reply_text(response_message)
