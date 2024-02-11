@@ -91,35 +91,20 @@ app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 # testing if the bot can read messages
 @app.on_message(filters.group & filters.command("test") & filters.text)
 async def echo(client, message):
-    print(bool(IS_OPENAI_TURN_ON))
-    if bool(IS_OPENAI_TURN_ON):
-        response = openai_helper.get_response(message.text)
-        await message.reply_text(response)
+    print(IS_OPENAI_TURN_ON)
+    if IS_OPENAI_TURN_ON:
+        # response = openai_helper.get_response(message.text)
+        # await message.reply_text("off")
+        print("ai on")
     else:
-        await message.reply_text(f"you said {message.text}")
-
-
-@app.on_message(filters.group)
-async def handle_message(client, message):
-    user_name = message.from_user.username
-    chat_id = message.chat.id
-    text = message.text or message.caption or ''
-
-    if f"{chat_id}" in user_messages:
-        user_messages[f"{chat_id}"].append(text)
-    else:
-        user_messages[f"{chat_id}"] = [text]
-
-    with open("messages.json", "w") as file:
-        json.dump(user_messages, file, indent=4)
-
-    print(
-        f"User {user_name or message.from_user.id} said: {text}")
+        # await message.reply_text(f"you said {message.text}")
+        print("ai off")
 
 
 async def main():
 
     async with app:
+
         await set_commands(app)  # Set bot commands
         print("Bot is running...")
         await asyncio.get_event_loop().create_future()
