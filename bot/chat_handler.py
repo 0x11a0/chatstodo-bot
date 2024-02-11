@@ -27,7 +27,8 @@ async def track_user_interaction(client, message):
         user_chat_interactions[chat_id] = []
 
     # Append the new message to the list of messages for this chat
-    user_chat_interactions[chat_id].append(message.text or "nil")
+    user_chat_interactions[chat_id].append(
+        (str(message.from_user.first_name) + ": " + message.text) or "nil")
 
     # Save back to the file
     with open("user_chat_interactions.json", "w") as file:

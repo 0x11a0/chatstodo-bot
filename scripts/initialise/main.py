@@ -1,5 +1,4 @@
 import sys
-import asyncio
 from pyrogram import Client, filters
 
 import os
