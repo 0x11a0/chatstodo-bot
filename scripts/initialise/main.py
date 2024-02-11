@@ -1,4 +1,4 @@
-import sys 
+import sys
 import asyncio
 from pyrogram import Client, filters
 
@@ -16,4 +16,4 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 app = Client("chats_todo_bot", API_ID, API_HASH, BOT_TOKEN)
 
-sys.exit()
+app.run(exit())
