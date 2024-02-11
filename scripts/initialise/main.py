@@ -1,3 +1,4 @@
+import sys 
 import asyncio
 from pyrogram import Client, filters
 
@@ -15,10 +16,4 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 app = Client("chats_todo_bot", API_ID, API_HASH, BOT_TOKEN)
 
-
-@app.on_message(filters.text & filters.private)
-async def echo(client, message):
-    await message.reply(message.text)
-
-
-app.run()
+sys.exit()
