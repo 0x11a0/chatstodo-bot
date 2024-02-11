@@ -7,6 +7,11 @@
     "message": "Here's how you can use this bot",
     "description": "Get help and instructions on how to use the bot"
   },
+  "groups": {
+    "message": "manage groups",
+    "description": "manage groups that I am connected to",
+    "error": "cannot manage groups"
+  },
   "all": {
     "message": "add all",
     "description": "Get summary, todo and event",
@@ -19,17 +24,23 @@
     "null": "no chats summary",
     "error": "cannot summary"
   },
-  "task": {
-    "message": "task",
-    "description": "Get task of group(s)",
-    "null": "no chats task",
-    "error": "cannot task"
+  "todo": {
+    "message": "todo",
+    "description": "Get todo of group(s)",
+    "null": "no chats todo",
+    "error": "cannot todo"
   },
   "event": {
     "message": "event",
     "description": "Get event of group(s)",
     "null": "no chats event",
     "error": "cannot event"
+  },
+  "schedule": {
+    "message": "schedule",
+    "description": "schedule at intervals",
+    "null": "no schedule",
+    "error": "cannot schedule"
   },
   "feedback": {
     "message": "feedback",
