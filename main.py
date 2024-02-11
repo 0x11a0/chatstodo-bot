@@ -5,7 +5,7 @@ import json
 
 import asyncio
 from pyrogram import Client, filters
-from bot.commands import summary, task, event, feedback, schedule, group
+from bot.commands import summary, task, event, feedback, schedule, group, all
 from bot import chat_handler
 from bot.commands.commands import COMMANDS, set_commands
 
@@ -61,6 +61,10 @@ app.on_message(filters.command("event") & filters.group)(
     event.handle_event_for_a_group)
 
 
+app.on_message(filters.command("all") & filters.private)(all.handle_all)
+app.on_message(filters.command("all") & filters.group)(
+    all.handle_all_for_a_group)
+
 app.on_message(filters.command("groups"))(group.handle_manage_groups)
 app.on_message(filters.text & filters.regex(
     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_group_navigation)
@@ -72,24 +76,6 @@ app.on_message(filters.command("feedback"))(feedback.handle_feedback)
 
 
 app.on_message(filters.command("schedule"))(schedule.handle_schedule)
-
-
-# @app.on_message(filters.command("all"))
-# async def handle_do_all_actions(client, message):
-#     command = message.command[0]
-#     reply = COMMANDS[command]["message"]
-#     error_message = COMMANDS[command]["error"]
-#     null_message = COMMANDS[command]["null"]
-#     current_chat_id = f"{message.chat.id}"
-
-#     try:
-#         if current_chat_id in user_messages:
-#             await message.reply_text(reply)
-#             await message.reply_text(str(user_messages[f"{message.chat.id}"]))
-#         else:
-#             await message.reply_text(null_message)
-#     except:
-#         await message.reply_text(error_message)
 
 
 # # testing if the bot can read messages

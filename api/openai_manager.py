@@ -38,3 +38,15 @@ class OpenAiHelper:
         completion = self.client.chat.completions.create(
             model=self.model, messages=[{"role": "user", "content": combined_message}])
         return completion.choices[0].message.content
+
+    def get_summary_event_todo_response(self, message_text):
+        prompt = "Based on the following chat history, do these three steps.\
+            First, can you summarise into a 50 words paragraph? \
+            Second, can you identify and list all the tasks mentioned that need to be completed? \
+            Lastly, can you identify and list all the events mentioned along with the date/time and location? "
+
+        combined_message = f"{prompt}\n{message_text}"
+
+        completion = self.client.chat.completions.create(
+            model=self.model, messages=[{"role": "user", "content": combined_message}])
+        return completion.choices[0].message.content
