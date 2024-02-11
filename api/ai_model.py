@@ -11,7 +11,6 @@ executor = ThreadPoolExecutor(max_workers=1)
 
 
 async def async_summarize_chat(chat_log):
-    print(chat_log)
     loop = asyncio.get_event_loop()
     # Run the summarizer in a background thread
     processed = await loop.run_in_executor(executor, lambda: summarizer(chat_log))

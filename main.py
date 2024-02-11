@@ -23,7 +23,6 @@ user_messages = {}
 
 
 app = Client("chats_todo_bot")
-openai_helper = OpenAiHelper(OPENAI_KEY)
 
 with open("content/submessages.json", "r") as file:
     SUB_MESSAGES = json.load(file)

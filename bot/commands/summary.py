@@ -19,9 +19,6 @@ async def handle_summary(client, message):
 
         summary = await async_summarize_chat(chat_log)
 
-        # for line in content:
-        #     processed_chat += f"{line}\n"
-
         processed_chat += summary + "\n\n"
 
     response_message = "Here is the summary you requested for!\n\n" + \
