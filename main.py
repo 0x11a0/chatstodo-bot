@@ -5,7 +5,7 @@ import json
 
 import asyncio
 from pyrogram import Client, filters
-from bot.commands import summary, todo, event, feedback, schedule, group
+from bot.commands import summary, task, event, feedback, schedule, group
 from bot import chat_handler
 from bot.commands.commands import COMMANDS, set_commands
 
@@ -43,28 +43,31 @@ async def handle_help(client, message):
     await message.reply_text(reply)
 
 
+app.on_message(filters.group & filters.text)(
+    chat_handler.track_user_interaction)
+
 app.on_message(filters.command("summary") &
                filters.private)(summary.handle_summary)
 app.on_message(filters.command("summary") &
                filters.group)(summary.handle_summary_for_a_group)
 
-app.on_message(filters.group & filters.text)(
-    chat_handler.track_user_interaction)
+
+app.on_message(filters.command("start"))(handle_start)
+
+
+app.on_message(filters.command("task") & filters.private)(task.handle_task)
+app.on_message(filters.command("task") & filters.group)(task.handle_task)
+
+
+app.on_message(filters.command("event") & filters.private)(event.handle_event)
+app.on_message(filters.command("event") & filters.group)(event.handle_event)
+
+
 app.on_message(filters.command("groups"))(group.handle_manage_groups)
 app.on_message(filters.text & filters.regex(
     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_group_navigation)
 app.on_message(filters.text & ~filters.regex(
     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
-
-app.on_message(filters.command("start"))(handle_start)
-
-
-app.on_message(filters.command("todo"))(todo.handle_todo)
-app.on_callback_query(filters.regex(r"^todo_"))(todo.handle_todo_selection)
-
-
-app.on_message(filters.command("event"))(event.handle_event)
-app.on_callback_query(filters.regex(r"^event_"))(event.handle_event_selection)
 
 
 app.on_message(filters.command("feedback"))(feedback.handle_feedback)
