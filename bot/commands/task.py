@@ -2,11 +2,10 @@ from bot.commands.commands import COMMANDS
 from bot.chat_handler import process_chat_history
 from api.openai_manager import OpenAiHelper
 
-from dotenv import load_dotenv
-import os
 
-dotenv_path = os.path.join(os.getcwd(), '.env')
-load_dotenv(dotenv_path)
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 TURN_ON = os.getenv("TURN_ON") == 'True'

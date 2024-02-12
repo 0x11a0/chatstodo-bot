@@ -4,9 +4,7 @@ from api.openai_manager import OpenAiHelper
 
 import os
 from dotenv import load_dotenv
-
-dotenv_path = os.path.join(os.getcwd(), '.env')
-load_dotenv(dotenv_path)
+load_dotenv()
 
 OPENAI_KEY = os.getenv("OPENAI_KEY")
 TURN_ON = os.getenv("TURN_ON") == "True"

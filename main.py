@@ -9,8 +9,6 @@ from bot.commands import summary, task, event, feedback, schedule, group, all
 from bot import chat_handler
 from bot.commands.commands import COMMANDS, set_commands
 
-from api.openai_manager import OpenAiHelper
-
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
@@ -20,7 +18,7 @@ API_HASH = os.environ.get("API_HASH")
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
 OPENAI_KEY = os.environ.get("OPENAI_KEY")
-IS_OPENAI_TURN_ON = os.environ.get("TURN_ON") == 'True'
+IS_OPENAI_TURN_ON = os.environ.get("TURN_ON")
 
 user_messages = {}
 
@@ -80,19 +78,6 @@ app.on_message(filters.command("feedback"))(feedback.handle_feedback)
 
 
 app.on_message(filters.command("schedule"))(schedule.handle_schedule)
-
-
-# # testing if the bot can read messages
-# @app.on_message(filters.group & filters.command("test") & filters.text)
-# async def echo(client, message):
-#     print(IS_OPENAI_TURN_ON)
-#     if IS_OPENAI_TURN_ON:
-#         # response = openai_helper.get_response(message.text)
-#         # await message.reply_text("off")
-#         print("ai on")
-#     else:
-#         # await message.reply_text(f"you said {message.text}")
-#         print("ai off")
 
 
 async def main():
