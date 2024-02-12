@@ -41,3 +41,12 @@
 1. Obtain your Bot Token.
 
    Access the following [link](https://core.telegram.org/bots) to get your BOT_TOKEN.
+
+### .env
+
+To change .env use
+
+```
+export TURN_ON=False
+echo $TURN_ON
+```

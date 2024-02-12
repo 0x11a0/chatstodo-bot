@@ -5,6 +5,8 @@ import json
 
 import asyncio
 from pyrogram import Client, filters
+from pyrogram.types import ChatMemberUpdated
+from pyrogram.enums import ChatMemberStatus
 from bot.commands import summary, task, event, feedback, schedule, group, all
 from bot import chat_handler
 from bot.commands.commands import COMMANDS, set_commands
@@ -44,6 +46,18 @@ async def handle_help(client, message):
     await message.reply_text(reply)
 
 
+@app.on_chat_member_updated()
+async def greet_on_add(client, chat_member_updated: ChatMemberUpdated):
+    try:
+        print("i am added")
+        if chat_member_updated.new_chat_member.user.is_self:
+            if chat_member_updated.new_chat_member.status == ChatMemberStatus.MEMBER:
+                chat_id = chat_member_updated.chat.id
+                await client.send_message(chat_id, SUB_MESSAGES["on_added"]["message"])
+    except:
+        print("Removed")
+
+
 app.on_message(filters.group & filters.text, group=1)(
     chat_handler.track_user_interaction)
 app.on_message(filters.command("start"))(handle_start)
@@ -67,17 +81,17 @@ app.on_message(filters.command("all") & filters.private)(all.handle_all)
 app.on_message(filters.command("all") & filters.group)(
     all.handle_all_for_a_group)
 
-app.on_message(filters.command("groups"))(group.handle_manage_groups)
-app.on_message(filters.text & filters.regex(
-    "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_group_navigation)
-app.on_message(filters.text & ~filters.regex(
-    "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
+# app.on_message(filters.command("groups"))(group.handle_manage_groups)
+# app.on_message(filters.text & filters.regex(
+#     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_group_navigation)
+# app.on_message(filters.text & ~filters.regex(
+#     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
 
 
 app.on_message(filters.command("feedback"))(feedback.handle_feedback)
 
 
-app.on_message(filters.command("schedule"))(schedule.handle_schedule)
+# app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 
 
 async def main():
