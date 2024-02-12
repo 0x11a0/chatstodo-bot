@@ -15,14 +15,18 @@ from api.openai_manager import OpenAiHelper
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-GROUP_ID = os.environ.get("GROUP_ID")
+API_ID = os.environ.get("API_ID")
+API_HASH = os.environ.get("API_HASH")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+
 OPENAI_KEY = os.environ.get("OPENAI_KEY")
 IS_OPENAI_TURN_ON = os.environ.get("TURN_ON") == 'True'
 
 user_messages = {}
 
 
-app = Client("chats_todo_bot")
+app = Client("chats_todo_bot", api_id=API_ID,
+             api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 with open("content/submessages.json", "r") as file:
     SUB_MESSAGES = json.load(file)

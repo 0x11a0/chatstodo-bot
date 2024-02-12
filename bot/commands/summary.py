@@ -4,15 +4,14 @@ from bot.chat_handler import process_chat_history
 from api.openai_manager import OpenAiHelper
 
 import os
-from os.path import join, dirname
 from dotenv import load_dotenv
 
 
-dotenv_path = join(dirname(__file__), '.env')
+dotenv_path = os.path.join(os.getcwd(), '.env')
 load_dotenv(dotenv_path)
 
-OPENAI_KEY = os.environ.get("OPENAI_KEY")
-TURN_ON = os.environ.get("TURN_ON") == 'True'
+OPENAI_KEY = os.getenv("OPENAI_KEY")
+TURN_ON = os.getenv("TURN_ON") == 'True'
 
 
 async def handle_summary(client, message):
@@ -56,7 +55,6 @@ async def handle_summary_for_a_group(client, message):
         response = openai_helper.get_task_response(chat_log)
     else:
         response = "mocked summary"
-
 
     response_message = "Here is the summary you requested for!\n\n" + response
     await message.reply_text(response_message)
