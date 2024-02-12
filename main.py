@@ -88,7 +88,8 @@ app.on_message(filters.command("all") & filters.group)(
 #     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
 
 
-app.on_message(filters.command("feedback"))(feedback.handle_feedback)
+app.on_message(filters.command("feedback") & filters.group)(feedback.handle_feedback_group)
+app.on_message(filters.command("feedback") & filters.private)(feedback.handle_feedback_private)
 
 
 # app.on_message(filters.command("schedule"))(schedule.handle_schedule)
