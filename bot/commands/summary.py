@@ -1,4 +1,3 @@
-from api.ai_model import async_summarize_chat
 from bot.commands.commands import COMMANDS
 from bot.chat_handler import process_chat_history
 from api.openai_manager import OpenAiHelper
