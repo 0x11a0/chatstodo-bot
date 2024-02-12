@@ -33,7 +33,7 @@ async def handle_event(client, message):
         else:
             response = "mocked events"
 
-        processed_chat += f"<b>{chat}</b>\n\n" + response
+        processed_chat += response + "\n\n"
 
     response_message = "Here is the event you requested for!\n\n" + \
         processed_chat

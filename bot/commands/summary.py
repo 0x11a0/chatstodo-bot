@@ -29,12 +29,14 @@ async def handle_summary(client, message):
         chat_log = " ".join(content)
 
         if TURN_ON:
+            print(TURN_ON, os.getenv("TURN_ON"))
             openai_helper = OpenAiHelper(OPENAI_KEY)
             response = openai_helper.get_summary_response(chat_log)
         else:
+            print(TURN_ON, os.getenv("TURN_ON"))
             response = "mocked summary"
 
-        processed_chat += f"<b>{chat}</b>\n\n" + response
+        processed_chat += response + "\n\n"
 
     response_message = "Here is the summary you requested for!\n\n" + \
         processed_chat

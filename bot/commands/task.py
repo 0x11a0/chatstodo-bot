@@ -47,7 +47,6 @@ async def handle_task_for_a_group(client, message):
 
     task_content = await process_chat_history(client, user_id, current_chat_id)
     chat_log = " ".join(task_content.get(current_chat_id, {}))
-    print(os.getenv("TURN_ON"), TURN_ON)
 
     if TURN_ON:
         openai_helper = OpenAiHelper(OPENAI_KEY)
