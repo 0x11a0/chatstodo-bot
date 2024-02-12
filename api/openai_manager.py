@@ -1,4 +1,5 @@
 from openai import OpenAI
+import os
 
 
 class OpenAiHelper:
@@ -40,13 +41,23 @@ class OpenAiHelper:
         return completion.choices[0].message.content
 
     def get_summary_event_todo_response(self, message_text):
-        prompt = "Based on the following chat history, do these three steps.\
-            First, can you summarise into a 50 words paragraph? \
-            Second, can you identify and list all the tasks mentioned that need to be completed? \
-            Lastly, can you identify and list all the events mentioned along with the date/time and location? "
+        folder_name = "content"
+        file_name = "prompt_1.txt"
+        current_dir = os.path.dirname(__file__)
+        parent_dir = os.path.dirname(current_dir)
+        file_path = os.path.join(
+            parent_dir, folder_name, file_name)
 
-        combined_message = f"{prompt}\n{message_text}"
+        prompt = ""
+        try:
+            with open(file_path, 'r') as file:
+                prompt = file.read()
+        except:
+            print("error")
+            prompt = ""
+        combined_message = f"{prompt}\n\n{message_text}"
 
+        print(combined_message)
         completion = self.client.chat.completions.create(
             model=self.model, messages=[{"role": "user", "content": combined_message}])
         return completion.choices[0].message.content

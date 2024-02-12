@@ -1,0 +1,4 @@
+Based on the following chat history, do these three steps.
+First, can you summarise into a 50 words paragraph?
+Second, can you identify and list all the tasks mentioned that need to be completed?
+Lastly, can you identify and list all the events mentioned along with the date/time and location?
