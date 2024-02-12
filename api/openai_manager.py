@@ -57,7 +57,6 @@ class OpenAiHelper:
             prompt = ""
         combined_message = f"{prompt}\n\n{message_text}"
 
-        print(combined_message)
         completion = self.client.chat.completions.create(
             model=self.model, messages=[{"role": "user", "content": combined_message}])
         return completion.choices[0].message.content
