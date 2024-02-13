@@ -7,7 +7,7 @@ import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import ChatMemberUpdated
 from pyrogram.enums import ChatMemberStatus
-from bot.commands import summary, task, event, feedback, schedule, group, all
+from bot.commands import summary, task, event, feedback, schedule, group, all, reset
 from bot import chat_handler
 from bot.commands.commands import COMMANDS, set_commands
 
@@ -88,10 +88,13 @@ app.on_message(filters.command("all") & filters.group)(
 #     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
 
 
-app.on_message(filters.command("feedback") & filters.group)(feedback.handle_feedback_group)
-app.on_message(filters.command("feedback") & filters.private)(feedback.handle_feedback_private)
+app.on_message(filters.command("feedback") & filters.group)(
+    feedback.handle_feedback_group)
+app.on_message(filters.command("feedback") & filters.private)(
+    feedback.handle_feedback_private)
 
-
+app.on_message(filters.command("reset") & filters.private)(
+    reset.handle_reset_state)
 # app.on_message(filters.command("schedule"))(schedule.handle_schedule)
 
 
