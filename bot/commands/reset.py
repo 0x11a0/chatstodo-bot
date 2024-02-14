@@ -25,12 +25,10 @@ def reset_chat(chat_id):
         file.close()
         return False  # Return False to indicate failure
 
-    if chat_id in user_chat_interactions and chat_id in original_chat:
+    if chat_id in original_chat:
         user_chat_interactions[chat_id] = original_chat[chat_id]
     else:
-        print(
-            f"Chat ID {chat_id} not found in either user_chat_interactions or original_chat.")
-        return False
+        print(f"Original chat state {chat_id} not found")
 
     with open("./user_chat_interactions.json", "w") as file:
         json.dump(user_chat_interactions, file, indent=2)
