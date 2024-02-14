@@ -12,6 +12,8 @@ def reset_chat(chat_id):
             user_chat_interactions = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         print("Error loading user_chat_interactions.json.")
+        file = open("./user_chat_interactions.json", 'w')
+        file.close()
         return False
 
     try:
@@ -19,6 +21,8 @@ def reset_chat(chat_id):
             original_chat = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         print("Error loading chat_state.json.")
+        file = open("./chat_state.json", 'w')
+        file.close()
         return False  # Return False to indicate failure
 
     if chat_id in user_chat_interactions and chat_id in original_chat:

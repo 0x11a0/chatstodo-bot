@@ -1,6 +1,8 @@
 *.session
 *.session-journal
 *.json
+!chat_state.json
+!authorised_users.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

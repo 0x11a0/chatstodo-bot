@@ -7,7 +7,8 @@ def is_authorised(chat_id, username):
         with open("./authorised_users.json", "r") as file:
             authorised_list = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        print("File not found")
+        file = open("./authorised_users.json", 'w')
+        file.close()
         return False
 
     if str(chat_id) in authorised_list:

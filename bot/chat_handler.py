@@ -6,9 +6,11 @@ from pyrogram.errors import PeerIdInvalid, UserNotParticipant
 def read_user_interactions():
     """Read all user interactions from the JSON file."""
     try:
-        with open("user_chat_interactions.json", "r") as file:
+        with open("./user_chat_interactions.json", "r") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
+        file = open("./user_chat_interactions.json", 'w')
+        file.close()
         return {}
 
 
@@ -18,7 +20,7 @@ async def track_user_interaction(client, message):
         print("Command detected, skipping...")
         return  # Skip adding command messages to interactions
 
-    print("listening")
+    print(f"listening to {message.chat.id}")
     chat_id = str(message.chat.id)  # Convert to string for JSON keys
     user_chat_interactions = read_user_interactions()
 
