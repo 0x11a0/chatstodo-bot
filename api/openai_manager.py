@@ -19,36 +19,21 @@ class OpenAiHelper:
             model=self.model, messages=[{"role": "user", "content": message_text}])
         return completion.choices[0].message.content
 
-    def get_task_response(self, message_text):
-        prompt = "Based on the following chat history, can you identify and list all the tasks mentioned that need to be completed? "
+    def get_prompt(self, prompt_type="all"):
+        folder_name = "content/prompts/"
+        if prompt_type == 'task':
+            folder_name += "task"
+            file_name = str(os.getenv("PROMPT_TASK")) + ".txt"
+        elif prompt_type == 'summary':
+            folder_name += "summary"
+            file_name = str(os.getenv("PROMPT_SUMMARY")) + ".txt"
+        elif prompt_type == 'event':
+            folder_name += "event"
+            file_name = str(os.getenv("PROMPT_EVENT")) + ".txt"
+        else:
+            folder_name += "all"
+            file_name = str(os.getenv("PROMPT_ALL")) + ".txt"
 
-        combined_message = f"{prompt}\n{message_text}"
-
-        completion = self.client.chat.completions.create(
-            model=self.model, messages=[{"role": "user", "content": combined_message}])
-        return completion.choices[0].message.content
-
-    def get_event_response(self, message_text):
-        prompt = "Based on the following chat history, can you identify and list all the events mentioned along with the date/time and location? "
-
-        combined_message = f"{prompt}\n{message_text}"
-
-        completion = self.client.chat.completions.create(
-            model=self.model, messages=[{"role": "user", "content": combined_message}])
-        return completion.choices[0].message.content
-
-    def get_summary_response(self, message_text):
-        prompt = "Based on the following chat history, can you summarise into a 50 words paragraph? "
-
-        combined_message = f"{prompt}\n{message_text}"
-
-        completion = self.client.chat.completions.create(
-            model=self.model, messages=[{"role": "user", "content": combined_message}])
-        return completion.choices[0].message.content
-
-    def get_summary_event_todo_response(self, message_text, username):
-        folder_name = "content"
-        file_name = os.getenv("PROMPT")
         current_dir = os.path.dirname(__file__)
         parent_dir = os.path.dirname(current_dir)
         file_path = os.path.join(
@@ -61,9 +46,43 @@ class OpenAiHelper:
         except:
             print("error")
             prompt == ""
+        return prompt
+
+    def get_task_response(self, message_text, username):
+        prompt = self.get_prompt("task")
         prompt = prompt.replace("{username}", username)
         combined_message = f"{prompt}\n\n{message_text}"
-        print(combined_message)
+        print("get /task")
+
+        completion = self.client.chat.completions.create(
+            model=self.model, messages=[{"role": "user", "content": combined_message}])
+        return completion.choices[0].message.content
+
+    async def get_event_response(self, message_text, username):
+        prompt = self.get_prompt("event")
+        prompt = prompt.replace("{username}", username)
+        combined_message = f"{prompt}\n\n{message_text}"
+        print("get /event")
+
+        completion = self.client.chat.completions.create(
+            model=self.model, messages=[{"role": "user", "content": combined_message}])
+        return completion.choices[0].message.content
+
+    def get_summary_response(self, message_text, username):
+        prompt = self.get_prompt("summary")
+        prompt = prompt.replace("{username}", username)
+        combined_message = f"{prompt}\n\n{message_text}"
+        print("get /summary")
+
+        completion = self.client.chat.completions.create(
+            model=self.model, messages=[{"role": "user", "content": combined_message}])
+        return completion.choices[0].message.content
+
+    def get_summary_event_todo_response(self, message_text, username):
+        prompt = self.get_prompt("all")
+        prompt = prompt.replace("{username}", username)
+        combined_message = f"{prompt}\n\n{message_text}"
+        print("get /all")
 
         completion = self.client.chat.completions.create(
             model=self.model, messages=[{"role": "user", "content": combined_message}])

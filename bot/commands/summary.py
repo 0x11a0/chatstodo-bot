@@ -1,4 +1,5 @@
 
+import json
 from bot.commands.commands import COMMANDS
 from bot.chat_handler import process_chat_history
 from api.openai_manager import OpenAiHelper
@@ -15,6 +16,7 @@ async def handle_summary(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     user_id = message.from_user.id
+    username = message.from_user.first_name
 
     summary_content = await process_chat_history(client, user_id)
 
@@ -23,11 +25,11 @@ async def handle_summary(client, message):
     for chat, content in summary_content.items():
         processed_chat += f"<b>{chat}</b>\n\n"
 
-        chat_log = " ".join(content)
+        chat_log = json.dumps(content)
 
         if TURN_ON:
             openai_helper = OpenAiHelper(OPENAI_KEY)
-            response = openai_helper.get_summary_response(chat_log)
+            response = openai_helper.get_summary_response(chat_log, username)
         else:
             print("is off")
             response = "mocked summary"
@@ -44,15 +46,16 @@ async def handle_summary_for_a_group(client, message):
     reply = COMMANDS[command]["message"]
     current_chat_id = message.chat.id
     user_id = message.from_user.id
+    username = message.from_user.first_name
 
     summary_content = await process_chat_history(client, user_id, current_chat_id)
-    chat_log = " ".join(summary_content.get(current_chat_id, {}))
+    chat_log = json.dumps(summary_content.get(current_chat_id, {}))
 
     response = ""
 
     if TURN_ON:
         openai_helper = OpenAiHelper(OPENAI_KEY)
-        response = openai_helper.get_task_response(chat_log)
+        response = openai_helper.get_task_response(chat_log, username)
     else:
         print("is off")
         response = "mocked summary"

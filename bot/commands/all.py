@@ -15,9 +15,10 @@ async def handle_all(client, message):
     command = message.command[0]
     reply = COMMANDS[command]["message"]
     user_id = message.from_user.id
+    username = message.from_user.first_name
 
     all_content = await process_chat_history(client, user_id)
-
+    
     processed_chat = ""
 
     for chat, content in all_content.items():
@@ -27,7 +28,7 @@ async def handle_all(client, message):
 
         if TURN_ON:
             openai_helper = OpenAiHelper(OPENAI_KEY)
-            response = openai_helper.get_summary_event_todo_response(chat_log)
+            response = openai_helper.get_summary_event_todo_response(chat_log, username)
         else:
             response = "mocked overview"
 

@@ -57,28 +57,36 @@ async def greet_on_add(client, chat_member_updated: ChatMemberUpdated):
     except:
         print("Removed")
 
-
+# tracking is 1
+# task is 2
+# summary is 3
+# event is 4
+# all is 5
+# feedback is 6
 app.on_message(filters.group & filters.text, group=1)(
     chat_handler.track_user_interaction)
 app.on_message(filters.command("start"))(handle_start)
 
-app.on_message(filters.command("task") & filters.private)(task.handle_task)
-app.on_message(filters.command("task") & filters.group)(
+app.on_message(filters.command("task") & filters.private,
+               group=2)(task.handle_task)
+app.on_message(filters.command("task") & filters.group, group=2)(
     task.handle_task_for_a_group)
 
 app.on_message(filters.command("summary") &
-               filters.private)(summary.handle_summary)
+               filters.private, group=3)(summary.handle_summary)
 app.on_message(filters.command("summary") &
-               filters.group)(summary.handle_summary_for_a_group)
+               filters.group, group=3)(summary.handle_summary_for_a_group)
 
 
-app.on_message(filters.command("event") & filters.private)(event.handle_event)
-app.on_message(filters.command("event") & filters.group)(
+app.on_message(filters.command("event") & filters.private,
+               group=4)(event.handle_event)
+app.on_message(filters.command("event") & filters.group, group=4)(
     event.handle_event_for_a_group)
 
 
-app.on_message(filters.command("all") & filters.private)(all.handle_all)
-app.on_message(filters.command("all") & filters.group)(
+app.on_message(filters.command("all") &
+               filters.private, group=5)(all.handle_all)
+app.on_message(filters.command("all") & filters.group, group=5)(
     all.handle_all_for_a_group)
 
 # app.on_message(filters.command("groups"))(group.handle_manage_groups)
@@ -88,9 +96,9 @@ app.on_message(filters.command("all") & filters.group)(
 #     "^(⬅️ Previous|Next ➡️|Add Groups|Help|Exit)$"))(group.handle_individual_group_actions)
 
 
-app.on_message(filters.command("feedback") & filters.group)(
+app.on_message(filters.command("feedback") & filters.group, group=6)(
     feedback.handle_feedback_group)
-app.on_message(filters.command("feedback") & filters.private)(
+app.on_message(filters.command("feedback") & filters.private, group=6)(
     feedback.handle_feedback_private)
 
 app.on_message(filters.command("reset") & filters.private)(
