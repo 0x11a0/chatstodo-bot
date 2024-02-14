@@ -33,7 +33,7 @@ def reset_chat(chat_id):
         user_chat_interactions[chat_id] = original_chat[chat_id]
     else:
         print(f"Original chat state {chat_id} not found")
-
+    print(user_chat_interactions[chat_id])
     with open("./user_chat_interactions.json", "w") as file:
         json.dump(user_chat_interactions, file, indent=2)
 
@@ -56,6 +56,7 @@ async def handle_reset_state(client, message):
     print(message.from_user.id, message.from_user.first_name)
     if is_authorised(message.from_user.id, message.from_user.first_name):
         chat_id = os.getenv("TRACK_RESET_CHAT_ID")
+        print(f"Resetting {chat_id}")
         has_reset = reset_chat(chat_id)
         if has_reset:
             await message.reply_text("Chat history has been successfully reset! Please manually delete up till the dashes")
