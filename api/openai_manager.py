@@ -1,5 +1,11 @@
 from openai import OpenAI
+
 import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 
 class OpenAiHelper:
@@ -40,9 +46,9 @@ class OpenAiHelper:
             model=self.model, messages=[{"role": "user", "content": combined_message}])
         return completion.choices[0].message.content
 
-    def get_summary_event_todo_response(self, message_text):
+    def get_summary_event_todo_response(self, message_text, username):
         folder_name = "content"
-        file_name = "prompt_1.txt"
+        file_name = os.getenv("PROMPT")
         current_dir = os.path.dirname(__file__)
         parent_dir = os.path.dirname(current_dir)
         file_path = os.path.join(
@@ -51,11 +57,13 @@ class OpenAiHelper:
         prompt = ""
         try:
             with open(file_path, 'r') as file:
-                prompt = file.read()
+                prompt += file.read()
         except:
             print("error")
-            prompt = ""
+            prompt == ""
+        prompt = prompt.replace("{username}", username)
         combined_message = f"{prompt}\n\n{message_text}"
+        print(combined_message)
 
         completion = self.client.chat.completions.create(
             model=self.model, messages=[{"role": "user", "content": combined_message}])

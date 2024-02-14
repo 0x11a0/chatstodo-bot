@@ -1,6 +1,12 @@
 import json
 from bot.auth import is_authorised
-from datetime import datetime, timedelta
+
+import os
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
 
 def reset_chat(chat_id):
@@ -14,7 +20,6 @@ def reset_chat(chat_id):
         print("Error loading user_chat_interactions.json.")
         file = open("./user_chat_interactions.json", 'w')
         file.close()
-        return False
 
     try:
         with open("./chat_state.json", "r") as file:
@@ -23,7 +28,6 @@ def reset_chat(chat_id):
         print("Error loading chat_state.json.")
         file = open("./chat_state.json", 'w')
         file.close()
-        return False  # Return False to indicate failure
 
     if chat_id in original_chat:
         user_chat_interactions[chat_id] = original_chat[chat_id]
@@ -51,7 +55,7 @@ async def delete_messages_after_datetime(app, chat_id, datetime_cutoff):
 async def handle_reset_state(client, message):
     print(message.from_user.id, message.from_user.first_name)
     if is_authorised(message.from_user.id, message.from_user.first_name):
-        chat_id = "-1002146428723"
+        chat_id = os.getenv("TRACK_RESET_CHAT_ID")
         has_reset = reset_chat(chat_id)
         if has_reset:
             await message.reply_text("Chat history has been successfully reset! Please manually delete up till the dashes")

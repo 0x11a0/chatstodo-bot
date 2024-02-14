@@ -1,3 +1,4 @@
+import json
 from bot.commands.commands import COMMANDS
 from bot.chat_handler import process_chat_history
 from api.openai_manager import OpenAiHelper
@@ -22,7 +23,7 @@ async def handle_all(client, message):
     for chat, content in all_content.items():
         processed_chat += f"<b>{chat}</b>\n\n"
 
-        chat_log = " ".join(content)
+        chat_log = json.dumps(content)
 
         if TURN_ON:
             openai_helper = OpenAiHelper(OPENAI_KEY)
@@ -42,13 +43,15 @@ async def handle_all_for_a_group(client, message):
     reply = COMMANDS[command]["message"]
     current_chat_id = message.chat.id
     user_id = message.from_user.id
+    user_name = message.from_user.first_name
 
     all_content = await process_chat_history(client, user_id, current_chat_id)
-    chat_log = " ".join(all_content.get(current_chat_id, {}))
+    chat_log = json.dumps(all_content.get(current_chat_id, {}))
 
     if TURN_ON:
         openai_helper = OpenAiHelper(OPENAI_KEY)
-        response = openai_helper.get_summary_event_todo_response(chat_log)
+        response = openai_helper.get_summary_event_todo_response(
+            chat_log, user_name)
     else:
         response = "mocked overview"
 
