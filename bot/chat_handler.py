@@ -50,6 +50,7 @@ async def user_belongs_to_chat(client, user_id, chat_id):
 
 async def process_chat_history(client, user_id, chat_id=None):
     chats = read_user_interactions()
+    print(chats)
     summary_content = {}
 
     # If chat_id is provided, filter for that specific group
