@@ -46,6 +46,7 @@ class OpenAiHelper:
         except:
             print("error")
             prompt == ""
+        print(f"Prompt used: {prompt}")
         return prompt
 
     def get_task_response(self, message_text, username):
