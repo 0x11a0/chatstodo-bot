@@ -55,7 +55,7 @@ async def handle_summary_for_a_group(client, message):
 
     if TURN_ON:
         openai_helper = OpenAiHelper(OPENAI_KEY)
-        response = openai_helper.get_task_response(chat_log, username)
+        response = openai_helper.get_summary_response(chat_log, username)
     else:
         print("is off")
         response = "mocked summary"
