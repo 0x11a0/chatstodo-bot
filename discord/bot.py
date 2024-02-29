@@ -88,6 +88,8 @@ async def on_message(message):
         producer.poll(1) 
     except Exception as e:
         print(f"Error producing message: {e}")
+        # need to handle if cannot send to kafka what to do,
+        # now it is an infinite loop that keeps trying to send to kafka       
         # sys.exit(f"Error producing message: {e}")
 
     producer.flush()
