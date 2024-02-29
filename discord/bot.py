@@ -6,7 +6,7 @@ from dotenv import load_dotenv # for environment variables
 import os # for environment variables
 import json # for json dump
 from confluent_kafka import Producer # for kafka producer
-
+import sys # for sys.exit
 
 load_dotenv()  # take environment variables from .env.
 
@@ -74,12 +74,12 @@ async def on_message(message):
 
     # send message to kafka
     platform = "discord"
-    sender_user_id = message.author.id
+    sender_user_id = message.author.name
     group_id = message.channel.id
     timestamp = message.created_at.strftime("%Y-%m-%d %H:%M:%S")
     message = message.content
     
-    kafka_parcel = {"platform": platform, "sender_user_id": sender_user_id, "gorup_id": group_id, "timestamp": timestamp, "message": message}
+    kafka_parcel = {"platform": platform, "sender_user_id": sender_user_id, "group_id": group_id, "timestamp": timestamp, "message": message}
     kafka_parcel_string = json.dumps(kafka_parcel)
     print(kafka_parcel_string) # print the kafka parcel string for debugging
     
@@ -88,6 +88,7 @@ async def on_message(message):
         producer.poll(1) 
     except Exception as e:
         print(f"Error producing message: {e}")
+        # sys.exit(f"Error producing message: {e}")
 
     producer.flush()
 
