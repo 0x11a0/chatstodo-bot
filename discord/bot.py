@@ -76,7 +76,7 @@ async def on_message(message):
     platform = "discord"
     sender_user_id = message.author.name
     group_id = message.channel.id
-    timestamp = message.created_at.strftime("%Y-%m-%d %H:%M:%S")
+    timestamp = message.created_at.isoformat()
     message = message.content
     
     kafka_parcel = {"platform": platform, "sender_user_id": sender_user_id, "group_id": group_id, "timestamp": timestamp, "message": message}
