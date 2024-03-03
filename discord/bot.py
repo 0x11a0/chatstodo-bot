@@ -4,101 +4,103 @@ from dataclasses import dataclass # for dataclass
 import datetime # for timestamp
 from dotenv import load_dotenv # for environment variables
 import os # for environment variables
+import json # for json dump
+from confluent_kafka import Producer # for kafka producer
+import sys # for sys.exit
 
 load_dotenv()  # take environment variables from .env.
 
+# bot env var
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
-MAX_SESSION_TIME_MINUTES = 1
 
-@dataclass
-class Session:
-    is_active: bool = False
-    start_time: int = 0
+# kafka env var
+topic = 'chat-messages'
+UPSTASH_KAFKA_SERVER = os.getenv("UPSTASH_KAFKA_SERVER")
+UPSTASH_KAFKA_USERNAME = os.getenv('UPSTASH_KAFKA_USERNAME')
+UPSTASH_KAFKA_PASSWORD = os.getenv('UPSTASH_KAFKA_PASSWORD')
 
+conf = {
+    'bootstrap.servers': UPSTASH_KAFKA_SERVER,
+    'sasl.mechanisms': 'SCRAM-SHA-256',
+    'security.protocol': 'SASL_SSL',
+    'sasl.username': UPSTASH_KAFKA_USERNAME,
+    'sasl.password': UPSTASH_KAFKA_PASSWORD
+}
 
+producer = Producer(**conf)
+
+# kafka acked definition
+def acked(err, msg):
+    if err is not None:
+        print(f"Failed to deliver message: {err.str()}")
+    else:
+        print(f"Message produced: {msg.topic()}")
+
+# define the prefix for the bot commands
 bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
 
-session = Session()
+# ------------------------------------------------- DISCORD EVENTS -----------------------------------------------------
 
-
-
-# STARTUP
+# BOT READY CHECKS
 @bot.event
 async def on_ready():
+    # send message to console when bot is ready
     print('Logged in as')
     print(bot.user.name)
     print('Console Check: ChatsTodo Bot is Ready')
     
     # send message to channel when bot is ready
     channel = bot.get_channel(CHANNEL_ID)
-    await channel.send('Channel Check: ChatsTodo Bot is Ready')
-
-
-# COMMANDS
-# hello command
-@bot.command()
-async def hello(ctx): # whatever you name this function is the command to type in e.g '!' + 'hello'
-    await ctx.send('Hello! I am ChatsTodo Bot. I am here to help you with your tasks.\n'
-               'Here are the commands you can use:\n'
-               '!ping - Pong!\n'
-               '!echo - Echoes your message\n'
-               '!add - Adds numbers together\n'
-               '!start - Starts a timed session\n'
-               '!end - Ends a timed session')
+    await channel.send('Hello! I am ChatsTodo Bot. I am here to help you with your tasks.\n'
+                        'Here are the commands you can use:\n'
+                        '!ping - Pong!\n')
     
+# MESSAGE LISTENER TO KAFKA
+@bot.event
+async def on_message(message):
+    # we do not want the bot to reply to itself
+    if message.author.id == bot.user.id:
+        return
+    
+    # check if message is a command, if so return
+    if message.content.startswith('!'):
+        return
+    
+    # this line is important for bot commands to work, 
+    # otherwise it will not recognise commands as
+    # it will not process them and only reads the message
+    await bot.process_commands(message)
+
+    # send message to kafka
+    platform = "discord"
+    sender_user_id = message.author.name
+    group_id = message.channel.id
+    timestamp = message.created_at.isoformat()
+    message = message.content
+    
+    kafka_parcel = {"platform": platform, "sender_user_id": sender_user_id, "group_id": group_id, "timestamp": timestamp, "message": message}
+    kafka_parcel_string = json.dumps(kafka_parcel)
+    print(kafka_parcel_string) # print the kafka parcel string for debugging
+    
+    try:
+        producer.produce(topic, kafka_parcel_string, callback=acked)
+        producer.poll(1) 
+    except Exception as e:
+        print(f"Error producing message: {e}")
+        # need to handle if cannot send to kafka what to do,
+        # now it is an infinite loop that keeps trying to send to kafka       
+        # sys.exit(f"Error producing message: {e}")
+
+    producer.flush()
+
+# ------------------------------------------------- DISCORD COMMANDS -----------------------------------------------------
+
 # ping command
 @bot.command()
 async def ping(ctx):
     await ctx.send('Pong!')
     
-# echo command
-@bot.command()
-async def echo(ctx, *, message):
-    await ctx.send(message)
 
-# math command
-@bot.command()
-async def add(ctx, *arr):
-    result = 0
-    for i in arr:
-        result += int(i)
-        
-    await ctx.send(f" Result = {result}")
-    
-# start a session command (uses dataclass and timestamp)
-@bot.command()
-async def start(ctx):
-    if session.is_active:
-        await ctx.send('Session is already active')
-    else:
-        session.is_active = True
-        session.start_time = ctx.message.created_at.timestamp()
-        human_readable_time = ctx.message.created_at.strftime("%d %b %Y %H:%M:%S")
-        break_reminder.start()
-        await ctx.send(f"New session has started at {human_readable_time}")
-        
-# end a session command   
-@bot.command()
-async def end(ctx):
-    if session.is_active:
-        session.is_active = False
-        end_time = ctx.message.created_at.timestamp()
-        elapsed_time = end_time - session.start_time
-        human_readable_time = str(datetime.timedelta(seconds=elapsed_time))
-        break_reminder.stop()
-        await ctx.send(f"Session has ended. Elapsed time: {human_readable_time}")
-    else:
-        await ctx.send('No active session to end')
-        
-@tasks.loop(minutes=MAX_SESSION_TIME_MINUTES, count=2) # 2 means 2 iterations, however we ignore the first iteration
-async def break_reminder():
-    
-    if break_reminder.current_loop == 0: # first iteration, ignore
-        return
-    
-    channel = bot.get_channel(CHANNEL_ID)
-    await channel.send(f'**You have been working for {MAX_SESSION_TIME_MINUTES} minutes**. Take a break!')
-
-    
+# run the bot with the provided token
 bot.run(BOT_TOKEN)
