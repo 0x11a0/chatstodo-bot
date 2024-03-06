@@ -1,94 +1,128 @@
 import os
 from os.path import join, dirname
 from dotenv import load_dotenv
+import datetime
 import json
 
+from confluent_kafka import Producer  # for kafka producer
+from telebot.async_telebot import AsyncTeleBot
 import asyncio
-from pyrogram import Client, filters
-from bot.commands import summary, task, event, feedback, schedule, group
-from bot import chat_handler
-from bot.commands.commands import COMMANDS, set_commands
 
+from bot.commands import COMMANDS
 
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-GROUP_ID = os.environ.get("GROUP_ID")
+BOT_TOKEN = os.environ.get("BOT_TOKEN")
+UPSTASH_KAFKA_SERVER = os.getenv("UPSTASH_KAFKA_SERVER")
+UPSTASH_KAFKA_USERNAME = os.getenv('UPSTASH_KAFKA_USERNAME')
+UPSTASH_KAFKA_PASSWORD = os.getenv('UPSTASH_KAFKA_PASSWORD')
 
-user_messages = {}
+topic = 'chat-messages'
+conf = {
+    'bootstrap.servers': UPSTASH_KAFKA_SERVER,
+    'sasl.mechanisms': 'SCRAM-SHA-256',
+    'security.protocol': 'SASL_SSL',
+    'sasl.username': UPSTASH_KAFKA_USERNAME,
+    'sasl.password': UPSTASH_KAFKA_PASSWORD
+}
 
-
-app = Client("chats_todo_bot")
-
-with open("content/submessages.json", "r") as file:
-    SUB_MESSAGES = json.load(file)
-
-
-@app.on_message(filters.command("start"))
-async def handle_start(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(f"Hello, {message.from_user.first_name}!\n\n" + reply)
-
-
-@app.on_message(filters.command("help"))
-async def handle_help(client, message):
-    command = message.command[0]
-    reply = COMMANDS[command]["message"]
-    await message.reply_text(reply)
+producer = Producer(**conf)
 
 
-app.on_message(filters.group & filters.text, group=1)(
-    chat_handler.track_user_interaction)
-app.on_message(filters.command("start"))(handle_start)
-
-app.on_message(filters.command("task") & filters.private)(task.handle_task)
-app.on_message(filters.command("task") & filters.group)(
-    task.handle_task_for_a_group)
-
-app.on_message(filters.command("summary") &
-               filters.private)(summary.handle_summary)
-app.on_message(filters.command("summary") &
-               filters.group)(summary.handle_summary_for_a_group)
+# kafka acked definition
+def acked(err, msg):
+    if err is not None:
+        print(f"Failed to deliver message: {err.str()}")
+    else:
+        print(f"Message produced: {msg.topic()}")
 
 
-app.on_message(filters.command("event") & filters.private)(event.handle_event)
-app.on_message(filters.command("event") & filters.group)(
-    event.handle_event_for_a_group)
+bot = AsyncTeleBot(BOT_TOKEN, parse_mode="HTML")
+
+# We need several commands
+# start
+# help
+# tasks
+# events
+# summary
+# feedback
 
 
-app.on_message(filters.command("feedback"))(feedback.handle_feedback)
+async def skip_pending_updates(bot):
+    print("Skipping older updates")
+    updates = await bot.get_updates()
+    if updates:
+        last_update_id = updates[-1].update_id
+        await bot.get_updates(offset=last_update_id + 1)
 
 
-app.on_message(filters.command("schedule"))(schedule.handle_schedule)
+@bot.message_handler(commands=['start'])
+async def handle_start(message):
+    reply = COMMANDS["start"]["message"]
+    await bot.reply_to(message, f"Hello, {message.from_user.first_name}!\n\n" + reply)
 
 
-# @app.on_message(filters.command("all"))
-# async def handle_do_all_actions(client, message):
-#     command = message.command[0]
-#     reply = COMMANDS[command]["message"]
-#     error_message = COMMANDS[command]["error"]
-#     null_message = COMMANDS[command]["null"]
-#     current_chat_id = f"{message.chat.id}"
+@bot.message_handler(commands=["help"])
+async def handle_help(message):
+    reply = COMMANDS["help"]["message"]
+    await bot.reply_to(message, reply)
 
-#     try:
-#         if current_chat_id in user_messages:
-#             await message.reply_text(reply)
-#             await message.reply_text(str(user_messages[f"{message.chat.id}"]))
-#         else:
-#             await message.reply_text(null_message)
-#     except:
-#         await message.reply_text(error_message)
+
+@bot.message_handler(commands=["tasks"], func=lambda message: message.chat.type in ["private"])
+async def handle_tasks(message):
+    await bot.reply_to(message, "tasks")
+
+
+@bot.message_handler(commands=["events"], func=lambda message: message.chat.type in ["private"])
+async def handle_events(message):
+    await bot.reply_to(message, "events")
+
+
+@bot.message_handler(commands=["summary"], func=lambda message: message.chat.type in ["private"])
+async def handle_summary(message):
+    await bot.reply_to(message, "summary")
+
+
+@bot.message_handler(commands=["all"], func=lambda message: message.chat.type in ["private"])
+async def handle_all(message):
+    await bot.reply_to(message, "all")
+
+@bot.message_handler(commands=["feedbacks"], func=lambda message: message.chat.type in ["private"])
+async def handle_feedbacks(message):
+    await bot.reply_to(message, "feedbacks")
+
+
+@bot.message_handler(func=lambda message: message.chat.type in ["group", "supergroup"])
+async def listen_to_group_messages(message):
+    kafka_parcel = {
+        "platform": "Telegram",
+        "sender_user_id": message.from_user.id,
+        "group_id": message.chat.id,
+        "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
+        "message": message.text
+    }
+
+    kafka_parcel_string = json.dumps(kafka_parcel)
+
+    try:
+        producer.produce(topic, kafka_parcel_string, callback=acked)
+        producer.poll(1)
+    except Exception as e:
+        print(f"Error producing message: {e}")
+        # need to handle if cannot send to kafka what to do,
+        # now it is an infinite loop that keeps trying to send to kafka
+        # sys.exit(f"Error producing message: {e}")
+
+    producer.flush()
 
 
 async def main():
+    print("Starting bot...")
+    # await skip_pending_updates(bot)
+    print("Bot is running!")
+    await asyncio.gather(bot.infinity_polling())
 
-    async with app:
 
-        await set_commands(app)  # Set bot commands
-        print("Bot is running...")
-        await asyncio.get_event_loop().create_future()
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(main())
+if __name__ == '__main__':
+    asyncio.run(main())
