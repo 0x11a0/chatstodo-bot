@@ -1,0 +1,39 @@
+{
+  "start": {
+    "message": "\ud83e\udd16<b>ChatsTodo - Your Virtual Assistant</b>\n\nCommands:\n/tasks - See your upcoming tasks\n/events - See your upcoming events\n/summary - Get a summary of your group chat\n/all - Get everything above!\n\n/help - For any questions or assistance",
+    "description": "Initiates the bot."
+  },
+  "help": {
+    "message": "Need some guidance? Here you can learn how to use all the features I offer, including\n\n/tasks - tracking tasks\n/summary - viewing summaries of your groups\n/events - managing events\n/all - get everything above!\n/feedbacks - provide feedbacks here\n\nJust type a command!",
+    "description": "Provides help on how to use the bot effectively."
+  },
+  "all": {
+    "message": "Looking to get a comprehensive overview? This command fetches summary, tasks and events across your groups for a complete snapshot.",
+    "description": "Retrieves a comprehensive summary from all chat groups.",
+    "null": "It seems there's nothing to report back right now. No tasks or events found across your chats.",
+    "error": "Oops! Encountered an issue fetching a comprehensive overview. Please try again later."
+  },
+  "summary": {
+    "message": "Interested in a quick glance at what's going on? I'll bring up a summary of the latest discussions",
+    "description": "Displays a summary of the latest discussions",
+    "null": "Currently, there are no updates to summarise for this group.",
+    "error": "I ran into a problem trying to fetch the summary. Could you try again later?"
+  },
+  "tasks": {
+    "message": "Need to focus on what's pending? I'll list out all the tasks that need your attention.",
+    "description": "Lists all pending tasks.",
+    "null": "Looks like you're all caught up! No pending tasks in this group.",
+    "error": "There was an issue retrieving tasks. Please try again shortly."
+  },
+  "events": {
+    "message": "Don't miss out on any events! I'll tell you about any upcoming events you should be aware of.",
+    "description": "Retrieves information about upcoming events.",
+    "null": "There are no upcoming events in this group. Time to plan something?",
+    "error": "Encountered a hiccup while trying to gather event details. Please try again later."
+  },
+  "feedbacks": {
+    "message": "Your feedback is invaluable to us.\n\nShare your thoughts, suggestions, or report any issues you're facing, and help us make ChatsTodo even better for you.",
+    "description": "Provide feedback on your experience with the bot, suggest improvements, or report issues.",
+    "error": "We're sorry, but we're currently unable to process your feedback. Please try again after some time."
+  }
+}
