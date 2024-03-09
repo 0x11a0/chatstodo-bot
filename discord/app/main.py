@@ -58,12 +58,12 @@ async def on_message(message):
     # we do not want the bot to reply to itself
     if message.author.id == bot.user.id:
         return
-
-    # this line is important for bot commands to work,
+    
+    # this line is important for bot commands to work, 
     # otherwise it will not recognise commands as
     # it will not process them and only reads the message
     await bot.process_commands(message)
-
+    
     # check if message is a command, if so return
     if message.content.startswith(bot.command_prefix):
         return
