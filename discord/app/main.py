@@ -37,7 +37,6 @@ def acked(err, msg):
     else:
         print(f"Message produced: {msg.topic()}")
 
-
 # define the prefix for the bot commands
 bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 # ------------------------------------------------- DISCORD EVENTS -----------------------------------------------------
