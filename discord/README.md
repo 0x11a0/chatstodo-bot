@@ -2,6 +2,28 @@
 
 This project is a Discord bot that reads messages on the discord server/channel indicated by CHANNEL_ID and sends them to kafka.
 
+### Setup instructions with Docker
+
+1. Run Docker application
+
+1. Start the Docker
+
+   ```
+   docker compose up -d --build
+   ```
+
+1. To view the logs
+
+   ```
+   docker-compose logs
+   ```
+
+1. To stop the docker compose
+
+   ```
+   docker compose down
+   ```
+
 ### Setup
 
 1. Navigate to the discord directory containing bot.py:
