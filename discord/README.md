@@ -34,7 +34,7 @@ This project is a Discord bot that reads messages on the discord server/channel 
 4. Run the bot:
 
    ```bash
-   python3 bot.py
+   python3 app/main.py
    ```
 
 5. The bot should now be online on the Discord server. To stop the bot, use Ctrl+C in the terminal.
