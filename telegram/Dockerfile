@@ -4,7 +4,8 @@ FROM python:${PYTHON_VERSION}-slim as base
 WORKDIR /app
 
 # Copy the source code into the container.
-COPY . .
+COPY ./app /app
+COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
@@ -13,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 8001
 
 # Run the application.
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]
