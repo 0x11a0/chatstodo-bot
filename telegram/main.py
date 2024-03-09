@@ -17,6 +17,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN")
 UPSTASH_KAFKA_SERVER = os.getenv("UPSTASH_KAFKA_SERVER")
 UPSTASH_KAFKA_USERNAME = os.getenv('UPSTASH_KAFKA_USERNAME')
 UPSTASH_KAFKA_PASSWORD = os.getenv('UPSTASH_KAFKA_PASSWORD')
+SKIP_UPDATES = os.getenv('SKIP_UPDATES').lower() == "true"
 
 topic = 'chat-messages'
 conf = {
@@ -43,8 +44,6 @@ bot = AsyncTeleBot(BOT_TOKEN, parse_mode="HTML")
 # We need several commands
 # start
 # help
-# tasks
-# events
 # summary
 # feedback
 
@@ -57,7 +56,7 @@ async def skip_pending_updates(bot):
         await bot.get_updates(offset=last_update_id + 1)
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 async def handle_start(message):
     reply = COMMANDS["start"]["message"]
     await bot.reply_to(message, f"Hello, {message.from_user.first_name}!\n\n" + reply)
@@ -69,24 +68,10 @@ async def handle_help(message):
     await bot.reply_to(message, reply)
 
 
-@bot.message_handler(commands=["tasks"], func=lambda message: message.chat.type in ["private"])
-async def handle_tasks(message):
-    await bot.reply_to(message, "tasks")
-
-
-@bot.message_handler(commands=["events"], func=lambda message: message.chat.type in ["private"])
-async def handle_events(message):
-    await bot.reply_to(message, "events")
-
-
 @bot.message_handler(commands=["summary"], func=lambda message: message.chat.type in ["private"])
 async def handle_summary(message):
     await bot.reply_to(message, "summary")
 
-
-@bot.message_handler(commands=["all"], func=lambda message: message.chat.type in ["private"])
-async def handle_all(message):
-    await bot.reply_to(message, "all")
 
 @bot.message_handler(commands=["feedbacks"], func=lambda message: message.chat.type in ["private"])
 async def handle_feedbacks(message):
@@ -119,7 +104,8 @@ async def listen_to_group_messages(message):
 
 async def main():
     print("Starting bot...")
-    # await skip_pending_updates(bot)
+    if not SKIP_UPDATES:
+        await skip_pending_updates(bot)
     print("Bot is running!")
     await asyncio.gather(bot.infinity_polling())
 
