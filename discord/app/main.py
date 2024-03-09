@@ -11,8 +11,8 @@ import sys  # for sys.exit
 load_dotenv()  # take environment variables from .env.
 
 # bot env var
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
+BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+CHANNEL_ID = int(os.getenv('DISCORD_CHANNEL_ID'))
 
 # kafka env var
 topic = 'chat-messages'
