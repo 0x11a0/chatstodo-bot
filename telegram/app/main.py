@@ -13,11 +13,11 @@ from bot.commands import COMMANDS
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN")
+BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 UPSTASH_KAFKA_SERVER = os.getenv("UPSTASH_KAFKA_SERVER")
 UPSTASH_KAFKA_USERNAME = os.getenv('UPSTASH_KAFKA_USERNAME')
 UPSTASH_KAFKA_PASSWORD = os.getenv('UPSTASH_KAFKA_PASSWORD')
-SKIP_UPDATES = os.getenv('SKIP_UPDATES').lower() == "true"
+SKIP_UPDATES = os.getenv('TELEGRAM_SKIP_UPDATES') == 1
 
 topic = 'chat-messages'
 conf = {
