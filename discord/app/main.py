@@ -10,7 +10,7 @@ import sys # for sys.exit
 load_dotenv()  # take environment variables from .env.
 
 # bot env var
-BOT_TOKEN = os.getenv('BOT_TOKEN')
+BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
 
 # kafka env var
 topic = 'chat-messages'
