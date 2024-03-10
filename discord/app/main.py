@@ -1,6 +1,5 @@
 from discord.ext import commands, tasks # for bot commands and tasks
 import discord # for discord API
-from dataclasses import dataclass # for dataclass
 import datetime # for timestamp
 from dotenv import load_dotenv # for environment variables
 import os # for environment variables
@@ -12,7 +11,6 @@ load_dotenv()  # take environment variables from .env.
 
 # bot env var
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-CHANNEL_ID = int(os.getenv('CHANNEL_ID'))
 
 # kafka env var
 topic = 'chat-messages'
@@ -40,23 +38,16 @@ def acked(err, msg):
         print(f"Message produced: {msg.topic()}")
 
 # define the prefix for the bot commands
-bot = commands.Bot(command_prefix='!', intents=discord.Intents.all())
-
+bot = commands.Bot(command_prefix='/', intents=discord.Intents.all())
 # ------------------------------------------------- DISCORD EVENTS -----------------------------------------------------
 
-# BOT READY CHECKS
+# BOT READY CHECK ON CONSOLE
 @bot.event
 async def on_ready():
     # send message to console when bot is ready
     print('Logged in as')
     print(bot.user.name)
     print('Console Check: ChatsTodo Bot is Ready')
-    
-    # send message to channel when bot is ready
-    channel = bot.get_channel(CHANNEL_ID)
-    await channel.send('Hello! I am ChatsTodo Bot. I am here to help you with your tasks.\n'
-                        'Here are the commands you can use:\n'
-                        '!ping - Pong!\n')
     
 # MESSAGE LISTENER TO KAFKA
 
@@ -73,9 +64,9 @@ async def on_message(message):
     await bot.process_commands(message)
     
     # check if message is a command, if so return
-    if message.content.startswith('!'):
+    if message.content.startswith(bot.command_prefix):
         return
-    
+
     # send message to kafka
     platform = "discord"
     sender_user_id = message.author.name
@@ -101,11 +92,22 @@ async def on_message(message):
 
 # ------------------------------------------------- DISCORD COMMANDS -----------------------------------------------------
 
-# ping command
+#ping command
 @bot.command()
 async def ping(ctx):
     await ctx.send('Pong!')
     
+# hi command
+@bot.command()
+async def hi(ctx):
+    await ctx.send('Hello! I am ChatsTodo Bot. I am here to help you with your tasks.\n'
+                    'Here are the commands you can use:\n'
+                    '!ping - Pong!\n')
+    
+# summary command
+@bot.command()
+async def summary(ctx):
+    await ctx.send('Here is your summary...\n')
 
 # run the bot with the provided token
 bot.run(BOT_TOKEN)
