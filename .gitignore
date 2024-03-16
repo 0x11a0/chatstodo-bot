@@ -1,8 +1,5 @@
 .DS_Store
 
-*.session
-*.session-journal
-*.json
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
