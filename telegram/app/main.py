@@ -1,5 +1,7 @@
 import os
 from os.path import join, dirname
+
+import requests
 from dotenv import load_dotenv
 import datetime
 import json
@@ -60,6 +62,17 @@ async def skip_pending_updates(bot):
 async def handle_start(message):
     reply = COMMANDS["start"]["message"]
     await bot.reply_to(message, f"Hello, {message.from_user.first_name}!\n\n" + reply)
+
+
+@bot.message_handler(commands=["connect"], func=lambda message: message.chat.type in ["private"])
+async def handle_connect_to_chatstodo(message):
+    api_url = "http://authentication:8080/auth/api/v1/bot/request-code"
+    user_credentials = {"userId": str(
+        message.from_user.id), "platform": "Telegram"}
+    response = requests.post(api_url, json=user_credentials)
+    x = response.json()
+    code = x["verification_code"]
+    await bot.reply_to(message, f"Here is your code {code}")
 
 
 @bot.message_handler(commands=["help"])
