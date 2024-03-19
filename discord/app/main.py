@@ -6,6 +6,7 @@ import os # for environment variables
 import json # for json dump
 from confluent_kafka import Producer # for kafka producer
 import sys # for sys.exit
+import requests # for requests
 
 load_dotenv()  # take environment variables from .env.
 
@@ -99,10 +100,25 @@ async def hi(ctx):
                     'Here are the commands you can use:\n'
                     '!ping - Pong!\n')
     
+# connect command
+@bot.command()
+async def connect(ctx):
+    if isinstance(ctx.channel, discord.DMChannel):  # Check if the command is issued in a private channel
+        api_url = "http://authentication:8080/auth/api/v1/bot/request-code"
+        
+        user_credentials = {"userId": str(ctx.author.id), "platform": "Discord"}
+        
+        response = requests.post(api_url, json=user_credentials)
+        
+        x = response.json()
+        code = x["verification_code"]
+        await ctx.send(f"Here is your code {code}")
+    
 # summary command
 @bot.command()
 async def summary(ctx):
-    await ctx.send('Here is your summary...\n')
+    if isinstance(ctx.channel, discord.DMChannel):
+        await ctx.send('Here is your summary...\n')
 
 # run the bot with the provided token
 bot.run(BOT_TOKEN)
