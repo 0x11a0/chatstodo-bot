@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  telegram:
+    build:
+      context: ./telegram
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    networks:
+      - chatstodo
+
+  discord:
+    build:
+      context: ./discord
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    networks:
+      - chatstodo
+
+networks:
+  chatstodo:
+    name: chatstodo
+    external: true
