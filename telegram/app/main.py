@@ -184,6 +184,19 @@ async def handle_delete_group(call):
         await bot.answer_callback_query(call.id, "Failed to remove group.")
 
 
+# listen to the supergroup and group chat leaving then delete the users that leave that group id
+@bot.message_handler(content_types=["left_chat_member"], func=lambda message: message.chat.type in ["group", "supergroup"])
+async def handle_left_chat_member(message):
+    group_id = str(message.chat.id)
+    user_id = str(message.left_chat_member.id)
+
+    count = groups_db.delete_group_of_user(
+        group_id, user_id, platform="Telegram")
+    if count > 0:
+        print(
+            f"Telegram: User {user_id} has left the group {group_id}, removed from tracking list")
+
+
 @bot.message_handler(commands=["help"])
 async def handle_help(message):
     reply = COMMANDS["help"]["message"]
