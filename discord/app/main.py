@@ -102,6 +102,10 @@ async def on_message(message):
 async def ping(ctx):
     await ctx.send('Pong!')
     
+    #print all groups in the database
+    groups = groups_db.get_groups_of_user(str(ctx.author.id))
+    print(groups)
+    
 # hi command
 @bot.command()
 async def hi(ctx):
@@ -145,13 +149,21 @@ async def track(ctx):
             "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
 
-        groups_db.insert_group(guild_data)
+        current_groups = await refresh_groups(user_id, groups_db, bot)
+        print(current_groups)
+        
+        if current_groups:
+            print(f"An entry with user id {user_id} and group id {guild_id} already exists in the database.")
+            await ctx.author.send(f"You are already tracking '{guild_name}'")
+        else:
+            groups_db.insert_group(guild_data)
 
-        # send a pm to the user
-        await ctx.author.send(f"You have added '{guild_name}' to your tracking list")
+            # send a pm to the user
+            await ctx.author.send(f"You have added '{guild_name}' to your tracking list")
         
 # view groups command
 async def refresh_groups(user_id, groups_db, bot):
+    print("refreshing groups")
     user_id = str(user_id)
     groups = groups_db.get_groups_of_user(user_id)
     current_groups = []
@@ -159,12 +171,15 @@ async def refresh_groups(user_id, groups_db, bot):
     # for loop the groups in db and check if the user is still in the group
     # if not, remove the group from the db
     for group in groups:
-        print(group)
         group_id = int(group["group_id"])
-        guild = bot.get_guild()
+        guild = bot.get_guild(group_id)
         
         if guild is not None:
-            member = guild.get_member(user_id)
+            print(guild.name)
+        else:
+            print("Guild not found")
+        if guild:
+            member = guild.fetch_member(user_id)
             if member is not None:
                 group["group_name"] = guild.name
                 current_groups.append(group)
@@ -174,13 +189,13 @@ async def refresh_groups(user_id, groups_db, bot):
                     groups_db.update_group(group_id, user_id, guild.name)
             else:
                 groups_db.delete_group_of_user(group_id, user_id)
-        print(current_groups)
     return current_groups
 
 @bot.command()
 async def viewGroups(ctx):
     if isinstance(ctx.channel, discord.DMChannel):  # Check if the command is issued in a private channel
         user_id = ctx.author.id
+        print("test")
         current_groups = await refresh_groups(user_id, groups_db, bot)
 
         if current_groups:
@@ -214,7 +229,7 @@ async def confirmDelete(ctx, group_id: int):
 
         # Assuming the delete_group_of_user method returns a boolean indicating success
         count = groups_db.delete_group_of_user(
-            str(group_id), user_id, platform="Discord")
+            str(group_id), str(user_id), platform="Discord")
 
         if count > 0:
             # Notify the user that the group has been removed
@@ -228,11 +243,11 @@ async def on_member_remove(member):
     guild_id = member.guild.id
 
     # Check if the user and guild ID exist in the database
-    group = groups_db.get_group_of_user(str(guild_id), user_id, platform="Discord")
+    group = groups_db.get_groups_of_user(str(guild_id), str(user_id), platform="Discord")
 
     # If the group exists, delete it
     if group:
-        groups_db.delete_group_of_user(str(guild_id), user_id)
+        groups_db.delete_group_of_user(str(guild_id), str(user_id), platform="Discord")
 
 # run the bot with the provided token
 bot.run(BOT_TOKEN)

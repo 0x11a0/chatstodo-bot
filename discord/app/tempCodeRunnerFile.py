@@ -1,1 +1,1 @@
-print(guild)
+if guild is not None:
