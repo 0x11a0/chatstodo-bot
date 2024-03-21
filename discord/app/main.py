@@ -3,21 +3,28 @@ import discord # for discord API
 import datetime # for timestamp
 from dotenv import load_dotenv # for environment variables
 import os # for environment variables
+from os.path import join, dirname, exists
 import json # for json dump
 from confluent_kafka import Producer # for kafka producer
 import sys # for sys.exit
 import requests # for requests
+from db.mongodb import MongoDBHandler # for mongodb
 
-load_dotenv()  # take environment variables from .env.
+# load the environment variables
+load_dotenv()
 
 # bot env var
 BOT_TOKEN = os.getenv('DISCORD_BOT_TOKEN')
+
+# mongodb env var
+GROUP_MONGODB_URL = os.getenv('GROUP_MONGODB_URL')
 
 # kafka env var
 topic = 'chat-messages'
 UPSTASH_KAFKA_SERVER = os.getenv("UPSTASH_KAFKA_SERVER")
 UPSTASH_KAFKA_USERNAME = os.getenv('UPSTASH_KAFKA_USERNAME')
 UPSTASH_KAFKA_PASSWORD = os.getenv('UPSTASH_KAFKA_PASSWORD')
+
 
 conf = {
     'bootstrap.servers': UPSTASH_KAFKA_SERVER,
@@ -28,6 +35,8 @@ conf = {
 }
 
 producer = Producer(**conf)
+
+groups_db = MongoDBHandler(db_url=GROUP_MONGODB_URL)
 
 # kafka acked definition
 def acked(err, msg):
@@ -119,6 +128,109 @@ async def connect(ctx):
 async def summary(ctx):
     if isinstance(ctx.channel, discord.DMChannel):
         await ctx.send('Here is your summary...\n')
+        
+# track command
+@bot.command()
+async def track(ctx):
+    if isinstance(ctx.guild, discord.Guild):  # Check if the command is issued in a guild
+        guild_id = ctx.guild.id
+        guild_name = ctx.guild.name
+        user_id = ctx.author.id
+
+        guild_data = {
+            "user_id": str(user_id),
+            "guild_id": str(guild_id),
+            "guild_name": str(guild_name),
+            "platform": "Discord",
+            "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
+        }
+
+        groups_db.insert_group(guild_data)
+
+        # send a pm to the user
+        await ctx.author.send(f"You have added '{guild_name}' to your tracking list")
+        
+# view groups command
+async def refresh_groups(user_id, groups_db, bot):
+    groups = groups_db.get_groups_of_user(user_id)
+    current_groups = []
+    print(f"Groups: {groups}")
+
+    # for loop the groups in db and check if the user is still in the group
+    # if not, remove the group from the db
+    for group in groups:
+        group_id = int(group["group_id"])
+        print(f"Group ID: {group_id}")
+        guild = bot.get_guild(group_id)
+        if guild is not None:
+            member = guild.get_member(user_id)
+            if member is not None:
+                group["group_name"] = guild.name
+                current_groups.append(group)
+
+                # update the new group name in the db if it is not the same as db
+                if guild.name != group["group_name"]:
+                    groups_db.update_group(group_id, user_id, guild.name)
+            else:
+                groups_db.delete_group_of_user(group_id, user_id)
+
+    return current_groups
+
+@bot.command()
+async def viewGroups(ctx):
+    if isinstance(ctx.channel, discord.DMChannel):  # Check if the command is issued in a private channel
+        user_id = ctx.author.id
+        current_groups = await refresh_groups(user_id, groups_db, bot)
+
+        if current_groups:
+            reply = "Here are the groups you are tracking:\n"
+            for group in current_groups:
+                reply += f"- {group['group_name']}\n"
+        else:
+            reply = "You are not tracking any groups yet"
+
+        await ctx.send(reply)
+        
+# delete group command
+@bot.command()
+async def deleteGroups(ctx):
+    if isinstance(ctx.channel, discord.DMChannel):  # Check if the command is issued in a private channel
+        user_id = ctx.author.id
+        current_groups = await refresh_groups(user_id, groups_db, bot)
+
+        if not current_groups:
+            await ctx.send("You are not tracking any groups yet.")
+            return
+
+        for group in current_groups:
+            await ctx.send(f"Do you want to remove '{group['group_name']}'? Type '/confirmDelete {group['group_id']}' to confirm.")
+
+@bot.command()
+async def confirmDelete(ctx, group_id: int):
+    if isinstance(ctx.channel, discord.DMChannel):  # Check if the command is issued in a private channel
+        user_id = ctx.author.id
+
+        # Assuming the delete_group_of_user method returns a boolean indicating success
+        count = groups_db.delete_group_of_user(
+            str(group_id), user_id, platform="Discord")
+
+        if count > 0:
+            # Notify the user that the group has been removed
+            await ctx.send("Group removed successfully.")
+        else:
+            await ctx.send("Failed to remove group.")
+            
+@bot.event
+async def on_member_remove(member):
+    user_id = member.id
+    guild_id = member.guild.id
+
+    # Check if the user and guild ID exist in the database
+    group = groups_db.get_group_of_user(str(guild_id), user_id, platform="Discord")
+
+    # If the group exists, delete it
+    if group:
+        groups_db.delete_group_of_user(str(guild_id), user_id)
 
 # run the bot with the provided token
 bot.run(BOT_TOKEN)
