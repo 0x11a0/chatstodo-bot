@@ -27,7 +27,9 @@
 - 8001: Telegram
 - 8002: Discord
 
-### Format of String package to send to Kafka
+### Formats
+
+#### String package to send to Kafka
 
 This is the format to follow when sending messages to Kafka.
 
@@ -38,5 +40,19 @@ This is the format to follow when sending messages to Kafka.
   "group_id": "", // an ID
   "timestamp": "", // in ISO
   "message": ""
+}
+```
+
+#### Group data to send to mongodb
+
+Send to collections, `Groups`
+
+```json
+{
+  "user_id": "", // str
+  "group_id": "", // str
+  "group_name": "",
+  "platform": "",
+  "created_at": "" // in ISO URC
 }
 ```

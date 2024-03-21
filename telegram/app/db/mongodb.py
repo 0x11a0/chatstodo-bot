@@ -1,6 +1,11 @@
+import logging
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from datetime import datetime, timedelta, timezone
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 
 class MongoDBHandler:
@@ -16,54 +21,44 @@ class MongoDBHandler:
             self.client = MongoClient(self.db_url)
             # test connection
             self.client.admin.command('ping')
-            print("Ping successful: Mongo database is available")
+            logger.info("Ping successful: Mongo database is available")
             self.db = self.client[self.db_name]
-            print("Connected to MongoDB")
-        except ConnectionFailure:
-            print("Failed to connect to MongoDB")
+            logger.info("Connected to MongoDB")
+        except ConnectionFailure as e:
+            logger.error("Failed to connect to MongoDB: %s", e)
             raise
 
-    # # Connect to MongoDB, use the "chatsToDo" database and the "Groups" collection
-    # def insert_message(self, document, collection_name="Groups"):
-    #     collection = self.db[collection_name]
-    #     return collection.insert_one(document).inserted_id
+    def insert_group(self, document, collection_name="Groups"):
+        collection = self.db[collection_name]
+        inserted_id = collection.insert_one(document).inserted_id
+        logger.info("Inserted document with ID: %s", inserted_id)
+        return inserted_id
 
     def close_connection(self):
-        self.client.close()
-        print("Connection to MongoDB closed")
+        if self.client:
+            self.client.close()
+            logger.info("Connection to MongoDB closed")
 
-    # # To call, use the following code:
-    # # documents = mongo_handler.get_past_24hrs("<GROUP_ID>"), replace group id with your group id
-    # # returns a list of documents corresponding to the chat messages
-    # def get_past_24hrs(self, group_id, collection_name="Messages"):
-    #     collection = self.db[collection_name]
+    def get_groups_of_user(self, user_id, collection_name="Groups"):
+        collection = self.db[collection_name]
+        documents = collection.find({"user_id": user_id})
+        return list(documents)
 
-    #     # Calculate the timestamp 24 hours ago
-    #     # Can change timedelta accordingly to the time period you want to delete
-    #     twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
+    def delete_group_of_user(self, group_id, user_id, platform, collection_name="Groups"):
+        collection = self.db[collection_name]
+        result = collection.delete_one({
+            "group_id": group_id,
+            "user_id": user_id,
+            "platform": platform
+        })
+        logger.info("Deleted count: %s", result.deleted_count)
+        return result.deleted_count
 
-    #     # Find documents matching the group_id and having a timestamp within the past 24 hours
-    #     documents = collection.find({
-    #         "group_id": group_id,
-    #         "timestamp": {"$gte": twenty_four_hours_ago.isoformat()}
-    #     })
-
-    #     return list(documents)
-
-    # # To call, use the following code:
-    # # deleted_count = mongo_handler.delete_past_24hrs("<GROUP_ID>"), replace group id with your group id
-    # # returns number of documents deleted
-    # def delete_past_24hrs(self, group_id, collection_name="Messages"):
-    #     collection = self.db[collection_name]
-
-    #     # Calculate the timestamp 24 hours ago
-    #     # Can change timedelta accordingly to the time period you want to delete
-    #     twenty_four_hours_ago = datetime.now(timezone.utc) - timedelta(days=1)
-
-    #     # Delete documents matching the group_id and having a timestamp within the past 24 hours
-    #     result = collection.delete_many({
-    #         "group_id": group_id,
-    #         "timestamp": {"$gte": twenty_four_hours_ago.isoformat()}
-    #     })
-
-    #     return result.deleted_count
+    def update_group(self, group_id, user_id, group_name, collection_name="Groups"):
+        collection = self.db[collection_name]
+        result = collection.update_one({
+            "group_id": group_id,
+            "user_id": user_id
+        }, {"$set": {"group_name": group_name}})
+        logger.info("Modified count: %s", result.modified_count)
+        return result.modified_count
