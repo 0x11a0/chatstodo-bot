@@ -139,8 +139,8 @@ async def track(ctx):
 
         guild_data = {
             "user_id": str(user_id),
-            "guild_id": str(guild_id),
-            "guild_name": str(guild_name),
+            "group_id": str(guild_id),
+            "group_name": str(guild_name),
             "platform": "Discord",
             "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
@@ -152,16 +152,17 @@ async def track(ctx):
         
 # view groups command
 async def refresh_groups(user_id, groups_db, bot):
+    user_id = str(user_id)
     groups = groups_db.get_groups_of_user(user_id)
     current_groups = []
-    print(f"Groups: {groups}")
 
     # for loop the groups in db and check if the user is still in the group
     # if not, remove the group from the db
     for group in groups:
+        print(group)
         group_id = int(group["group_id"])
-        print(f"Group ID: {group_id}")
-        guild = bot.get_guild(group_id)
+        guild = bot.get_guild()
+        
         if guild is not None:
             member = guild.get_member(user_id)
             if member is not None:
@@ -173,7 +174,7 @@ async def refresh_groups(user_id, groups_db, bot):
                     groups_db.update_group(group_id, user_id, guild.name)
             else:
                 groups_db.delete_group_of_user(group_id, user_id)
-
+        print(current_groups)
     return current_groups
 
 @bot.command()
@@ -186,6 +187,7 @@ async def viewGroups(ctx):
             reply = "Here are the groups you are tracking:\n"
             for group in current_groups:
                 reply += f"- {group['group_name']}\n"
+                print(reply)
         else:
             reply = "You are not tracking any groups yet"
 
