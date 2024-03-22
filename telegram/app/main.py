@@ -86,6 +86,12 @@ async def handle_track_group(message):
         "created_at": datetime.datetime.now(datetime.UTC).isoformat()
     }
 
+    current_groups = await refresh_groups(user_id, groups_db, bot)
+
+    if current_groups:
+        print(f"An entry with user id {user_id} and group id {
+              group_id} already exists in the database.")
+
     groups_db.insert_group(group_data)
 
     # send a pm to the user
@@ -93,6 +99,7 @@ async def handle_track_group(message):
 
 
 async def refresh_groups(user_id, groups_db, bot):
+    user_id = str(user_id)
     groups = groups_db.get_groups_of_user(user_id)
     current_groups = []
 

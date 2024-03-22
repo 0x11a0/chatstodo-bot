@@ -44,6 +44,11 @@ class MongoDBHandler:
         documents = collection.find({"user_id": user_id})
         return list(documents)
 
+    def get_a_group(self, user_id, group_id, collection_name="Groups"):
+        collection = self.db[collection_name]
+        documents = collection.find({"user_id": user_id, "group_id": group_id})
+        return list(documents)
+
     def delete_group_of_user(self, group_id, user_id, platform, collection_name="Groups"):
         collection = self.db[collection_name]
         result = collection.delete_one({
