@@ -164,8 +164,8 @@ async def track(ctx):
 
         # check if guild_id exists in the current_groups list of objects
         if does_user_exist_in_guild:
-            print(f"An entry with user id {user_id} and group id {
-                  guild_id} already exists in the database.")
+            print(
+                f"An entry with user id {user_id} and group id {guild_id} already exists in the database.")
             await ctx.author.send(f"You are already tracking '{guild_name}'")
         else:
             groups_db.insert_group(guild_data)
@@ -177,13 +177,16 @@ async def track(ctx):
 async def check_user_exists_in_guild(user_id, group_id, groups_db, bot):
     user_id_str = str(user_id)
     group_id_str = str(group_id)
-    group = groups_db.get_a_group(user_id, group_id_str)
+    group = groups_db.get_a_group(user_id_str, group_id_str)
 
+    print(group)
     if group:
         guild = bot.get_guild(group_id)
+        print(guild)
         if guild:
             try:
                 member = await guild.fetch_member(user_id)
+                print(member)
 
                 # member does exist in the guild
                 if member:
