@@ -160,18 +160,48 @@ async def track(ctx):
             "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat()
         }
 
-        current_groups = await refresh_groups(user_id, groups_db, bot)
-        print(current_groups)
-        
-        if current_groups:
-            print(f"An entry with user id {user_id} and group id {guild_id} already exists in the database.")
+        does_user_exist_in_guild = await check_user_exists_in_guild(user_id, guild_id, groups_db, bot)
+
+        # check if guild_id exists in the current_groups list of objects
+        if does_user_exist_in_guild:
+            print(
+                f"An entry with user id {user_id} and group id {guild_id} already exists in the database.")
             await ctx.author.send(f"You are already tracking '{guild_name}'")
         else:
             groups_db.insert_group(guild_data)
 
             # send a pm to the user
             await ctx.author.send(f"You have added '{guild_name}' to your tracking list")
-        
+
+
+async def check_user_exists_in_guild(user_id, group_id, groups_db, bot):
+    user_id_str = str(user_id)
+    group_id_str = str(group_id)
+    group = groups_db.get_a_group(user_id_str, group_id_str, "Discord")
+
+    print(group)
+    if group:
+        guild = bot.get_guild(group_id)
+        print(guild)
+        if guild:
+            try:
+                member = await guild.fetch_member(user_id)
+                print(member)
+
+                # member does exist in the guild
+                if member:
+                    if guild.name != group["group_name"]:
+                        groups_db.update_group(
+                            group_id_str, user_id_str, guild.name)
+                    return True
+
+            except discord.NotFound:
+                groups_db.delete_group_of_user(
+                    group_id_str, user_id_str, "Discord")
+
+    return False
+
+
 # view groups command
 async def refresh_groups(user_id, groups_db, bot):
     print("refreshing groups")
@@ -188,16 +218,16 @@ async def refresh_groups(user_id, groups_db, bot):
         if guild:
             try:
                 member = await guild.fetch_member(user_id)
-                group["group_name"] = guild.name
-                current_groups.append(group)
+                if member:
+                    current_groups.append(group)
 
-                if guild.name != group["group_name"]:
-                    groups_db.update_group(group_id, str(user_id), guild.name)
+                    if guild.name != group["group_name"]:
+                        groups_db.update_group(
+                            group_id, str(user_id), guild.name)
             except discord.NotFound:
                 groups_db.delete_group_of_user(
                     group_id, str(user_id), "Discord")
 
-        print(current_groups)
     return current_groups
 
 
@@ -260,11 +290,13 @@ async def on_member_remove(member):
     guild_id = member.guild.id
 
     # Check if the user and guild ID exist in the database
-    group = groups_db.get_groups_of_user(str(guild_id), str(user_id), platform="Discord")
+    group = groups_db.get_groups_of_user(
+        str(guild_id), str(user_id), platform="Discord")
 
     # If the group exists, delete it
     if group:
-        groups_db.delete_group_of_user(str(guild_id), str(user_id), platform="Discord")
+        groups_db.delete_group_of_user(
+            str(guild_id), str(user_id), platform="Discord")
 
 # run the bot with the provided token
 bot.run(BOT_TOKEN)
