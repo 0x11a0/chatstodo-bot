@@ -177,7 +177,7 @@ async def track(ctx):
 async def check_user_exists_in_guild(user_id, group_id, groups_db, bot):
     user_id_str = str(user_id)
     group_id_str = str(group_id)
-    group = groups_db.get_a_group(user_id_str, group_id_str)
+    group = groups_db.get_a_group(user_id_str, group_id_str, "Discord")
 
     print(group)
     if group:
@@ -197,7 +197,7 @@ async def check_user_exists_in_guild(user_id, group_id, groups_db, bot):
 
             except discord.NotFound:
                 groups_db.delete_group_of_user(
-                    group_id, str(user_id), "Discord")
+                    group_id_str, user_id_str, "Discord")
 
     return False
 

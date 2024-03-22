@@ -86,16 +86,44 @@ async def handle_track_group(message):
         "created_at": datetime.datetime.now(datetime.UTC).isoformat()
     }
 
-    current_groups = await refresh_groups(user_id, groups_db, bot)
+    does_user_belong_to_group = await check_user_belongs_to_group(user_id, group_id, groups_db, bot)
 
-    if current_groups:
-        print(f"An entry with user id {user_id} and group id {
-              group_id} already exists in the database.")
+    if does_user_belong_to_group:
+        print(
+            f"An entry with user id {user_id} and group id {group_id} already exists in the database.")
+        await bot.send_message(user_id, f"You have already added '{group_name}' to your tracking list")
+    else:
+        groups_db.insert_group(group_data)
+        # send a pm to the user
+        await bot.send_message(user_id, f"You have added '{group_name}' to your tracking list")
 
-    groups_db.insert_group(group_data)
 
-    # send a pm to the user
-    await bot.send_message(user_id, f"You have added '{group_name}' to your tracking list")
+async def check_user_belongs_to_group(user_id, group_id, groups_db, bot):
+    user_id_str = str(user_id)
+    group_id_str = str(group_id)
+    group = groups_db.get_a_group(
+        user_id_str, group_id_str, platform="Telegram")
+
+    if group:
+        try:
+            member = await bot.get_chat_member(group_id, user_id)
+
+            if member:
+                # get the group name and add it to the list
+                updated_group = await bot.get_chat(group_id)
+
+                # update the new group name in the db if it is not the same as db
+                if updated_group.title != group["group_name"]:
+                    groups_db.update_group(
+                        group_id_str, user_id_str, updated_group.title)
+
+                return True
+
+        except Exception as e:
+            print(f"Error getting chat member: {e}")
+            groups_db.delete_group_of_user(group_id_str, user_id_str)
+
+    return False
 
 
 async def refresh_groups(user_id, groups_db, bot):
