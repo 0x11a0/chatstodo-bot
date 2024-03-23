@@ -82,12 +82,12 @@ async def on_message(message):
 
     # send message to kafka
     platform = "discord"
-    sender_user_id = message.author.name
+    sender_name = message.author.name
     group_id = message.channel.id
     timestamp = message.created_at.isoformat()
     message = message.content
 
-    kafka_parcel = {"platform": platform, "sender_user_id": sender_user_id,
+    kafka_parcel = {"platform": platform, "sender_name": sender_name,
                     "group_id": group_id, "timestamp": timestamp, "message": message}
     kafka_parcel_string = json.dumps(kafka_parcel)
     print(kafka_parcel_string)  # print the kafka parcel string for debugging

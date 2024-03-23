@@ -252,7 +252,7 @@ async def handle_feedbacks(message):
 async def listen_to_group_messages(message):
     kafka_parcel = {
         "platform": "Telegram",
-        "sender_user_id": message.from_user.id,
+        "sender_name": message.from_user.first_name,
         "group_id": message.chat.id,
         "timestamp": datetime.datetime.now(datetime.UTC).isoformat(),
         "message": message.text
